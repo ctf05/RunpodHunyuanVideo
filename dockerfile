@@ -31,41 +31,39 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Create necessary directories
-RUN mkdir -p /app/ComfyUI \
-    /app/custom_nodes \
-    /app/models/checkpoints \
-    /app/models/clip \
-    /app/models/text_encoder \
-    /app/models/vae \
-    /app/workflows
-
 # Install ComfyUI
 RUN git clone https://github.com/comfyanonymous/ComfyUI.git /app/ComfyUI
 
 # Install HunyuanVideo wrapper
-RUN git clone https://github.com/kijai/ComfyUI-HunyuanVideoWrapper.git /app/custom_nodes/hunyuan_wrapper
+RUN git clone https://github.com/kijai/ComfyUI-HunyuanVideoWrapper.git /app/ComfyUI/custom_nodes/hunyuan_wrapper
 
-# Copy application files
-COPY handler.py requirements.txt /app/
-COPY workflows/hyvideo_t2v_example_01.json /app/workflows/
+# Create necessary directories
+RUN mkdir -p /app/ComfyUI/models/diffusion_models \
+    /app/ComfyUI/models/vae \
+    /app/ComfyUI/models/clip/clip-vit-large-patch14 \
+    /app/ComfyUI/models/LLM/llava-llama-3-8b-text-encoder-tokenizer \
+    /app/workflows
 
 # Download models
-RUN wget -O /app/models/checkpoints/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors \
-    https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors && \
-    wget -O /app/models/vae/hunyuan_video_vae_bf16.safetensors \
+RUN wget -O /app/ComfyUI/models/diffusion_models/hunyuan_video_720_fp8_e4m3fn.safetensors \
+    https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_fp8_e4m3fn.safetensors && \
+    wget -O /app/ComfyUI/models/vae/hunyuan_video_vae_bf16.safetensors \
     https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_vae_bf16.safetensors && \
-    wget -O /app/models/clip/model.safetensors \
+    wget -O /app/ComfyUI/models/clip/clip-vit-large-patch14/model.safetensors \
     https://huggingface.co/openai/clip-vit-large-patch14/resolve/main/model.safetensors
 
 # Clone text encoder model
 RUN git clone https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer \
-    /app/models/text_encoder/llava-llama-3-8b-text-encoder-tokenizer
+    /app/ComfyUI/models/LLM/llava-llama-3-8b-text-encoder-tokenizer
+
+# Copy application files
+COPY handler.py test_handler.py requirements.txt /app/
+COPY workflows/hyvideo_t2v_example_01.json /app/workflows/
 
 # Install Python dependencies
 COPY requirements.txt /app/
 RUN cd /app/ComfyUI && pip install -r requirements.txt
-RUN cd /app/custom_nodes/hunyuan_wrapper && pip install -r requirements.txt
+RUN cd /app/ComfyUI/custom_nodes/hunyuan_wrapper && pip install -r requirements.txt
 RUN pip install -r requirements.txt
 
 # Clean up
