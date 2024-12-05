@@ -45,8 +45,8 @@ RUN mkdir -p /app/ComfyUI/models/diffusion_models \
     /app/workflows
 
 # Download models
-RUN wget -O /app/ComfyUI/models/diffusion_models/hunyuan_video_720_fp8_e4m3fn.safetensors \
-    https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_fp8_e4m3fn.safetensors && \
+RUN wget -O /app/ComfyUI/models/diffusion_models/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors \
+    https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors && \
     wget -O /app/ComfyUI/models/vae/hunyuan_video_vae_bf16.safetensors \
     https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_vae_bf16.safetensors && \
     wget -O /app/ComfyUI/models/clip/clip-vit-large-patch14/model.safetensors \
