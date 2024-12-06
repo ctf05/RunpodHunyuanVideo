@@ -40,20 +40,26 @@ class HunyuanGenerator:
         """Initialize ComfyUI if not already initialized"""
         if not self.initialized:
             # Load custom nodes
-            nodes.init_extra_nodes()
+            nodes.init_xtra_nodes()
 
-            # Initialize server
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
 
-            # Create server instance with explicit address and port
+            # Create server instance
             server_instance = server.PromptServer(loop)
-            server_instance.start('127.0.0.1', COMFY_PORT)
             server.PromptServer.instance = server_instance
 
             # Initialize executor with server instance
             self.executor = PromptExecutor(server.PromptServer.instance)
 
+            # Start server in a background task
+            async def start_server():
+                await server.PromptServer.instance.start('127.0.0.1', COMFY_PORT)
+
+            loop.create_task(start_server())
             self.initialized = True
 
     def update_workflow(self, params: Dict[str, Any]) -> Dict:
@@ -129,9 +135,9 @@ class HunyuanGenerator:
             # Update workflow with parameters
             workflow = self.update_workflow(params)
 
-            # Create event loop if it doesn't exist
+            # Get or create event loop
             try:
-                loop = asyncio.get_event_loop()
+                loop = asyncio.get_running_loop()
             except RuntimeError:
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
