@@ -217,7 +217,7 @@
       },
       "widgets_values": [
         |prompt|,
-        |negative_prompt|,
+        |negative_prompt|
       ]
     },
     {
