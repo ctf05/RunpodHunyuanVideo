@@ -216,8 +216,8 @@
         "Node name for S&R": "HyVideoTextEncode"
       },
       "widgets_values": [
-        |prompt|,
-        |negative_prompt|
+        "|prompt|",
+        "|negative_prompt|"
       ]
     },
     {
