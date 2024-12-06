@@ -1,34 +1,23 @@
-import os
-import time
-import base64
 import runpod
-import torch
-import asyncio
-from typing import Dict, Any, Optional
 import json
-import sys
+import urllib.request
+import urllib.parse
+import time
+import os
+import requests
+import base64
 
-# Add ComfyUI to path
-comfy_path = os.path.join(os.path.dirname(__file__), 'ComfyUI')
-sys.path.append(comfy_path)
-os.environ['PYTORCH_ENABLE_MPS_FALLBACK'] = '1'
-
-# Import ComfyUI components
-import nodes
-import folder_paths
-import server
-from execution import PromptExecutor
-
-# Constants
-COMFY_PORT = int(os.environ.get('COMFY_PORT', 8188))
-MAX_RETRIES = 100
-RETRY_DELAY = 0.5
+# Constants for ComfyUI interaction
+COMFY_API_AVAILABLE_INTERVAL_MS = 50
+COMFY_API_AVAILABLE_MAX_RETRIES = 500
+COMFY_POLLING_INTERVAL_MS = int(os.environ.get("COMFY_POLLING_INTERVAL_MS", 250))
+COMFY_POLLING_MAX_RETRIES = int(os.environ.get("COMFY_POLLING_MAX_RETRIES", 500))
+COMFY_HOST = "127.0.0.1:8188"
+REFRESH_WORKER = os.environ.get("REFRESH_WORKER", "false").lower() == "true"
 
 class HunyuanGenerator:
     def __init__(self):
         self.workflow_path = os.path.join(os.path.dirname(__file__), 'workflows/hyvideo_t2v_example_01.json')
-        self.initialized = False
-        self.executor = None
         self.load_default_workflow()
 
     def load_default_workflow(self):
@@ -36,37 +25,9 @@ class HunyuanGenerator:
         with open(self.workflow_path, 'r') as f:
             self.workflow_template = json.load(f)
 
-    def initialize(self):
-        """Initialize ComfyUI if not already initialized"""
-        if not self.initialized:
-            # Load custom nodes
-            nodes.init_extra_nodes()
-
-            try:
-                loop = asyncio.get_running_loop()
-            except RuntimeError:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-
-            # Create server instance
-            server_instance = server.PromptServer(loop)
-            server.PromptServer.instance = server_instance
-
-            # Initialize executor with server instance
-            self.executor = PromptExecutor(server.PromptServer.instance)
-
-            # Start server in a background task
-            async def start_server():
-                await server.PromptServer.instance.start('127.0.0.1', COMFY_PORT)
-
-            loop.create_task(start_server())
-            self.initialized = True
-
-    def update_workflow(self, params: Dict[str, Any]) -> Dict:
+    def update_workflow(self, params: dict) -> dict:
         """Update workflow template with new parameters"""
         workflow = self.workflow_template.copy()
-
-        # Update nodes dict to match actual workflow
         nodes_dict = workflow['nodes']
 
         # Update text encode node
@@ -90,96 +51,73 @@ class HunyuanGenerator:
 
         return workflow
 
-    async def execute_workflow(self, workflow: Dict) -> Dict:
-        """Execute workflow and return results"""
-        # Format workflow for execution
-        prompt = {"prompt": workflow}
-
-        # Execute the workflow using the executor
-        outputs = await self.executor.execute_workflow(prompt)
-        if not outputs:
-            raise RuntimeError("No outputs from workflow execution")
-
-        return outputs
-
-    def generate(
-            self,
-            prompt: str,
-            negative_prompt: str = "",
-            width: int = 512,
-            height: int = 512,
-            num_frames: int = 16,
-            fps: int = 8,
-            num_inference_steps: int = 30,
-            seed: Optional[int] = None,
-    ) -> bytes:
-        """Generate video based on input parameters"""
+def check_server(url, retries=500, delay=50):
+    """Check if ComfyUI server is reachable"""
+    for i in range(retries):
         try:
-            self.initialize()
+            response = requests.get(url)
+            if response.status_code == 200:
+                print(f"runpod-worker-comfy - API is reachable")
+                return True
+        except requests.RequestException:
+            pass
+        time.sleep(delay / 1000)
 
-            # Set random seed if provided
-            if seed is not None:
-                torch.manual_seed(seed)
+    print(f"runpod-worker-comfy - Failed to connect to server at {url} after {retries} attempts.")
+    return False
 
-            # Prepare parameters
-            params = {
-                'prompt': prompt,
-                'negative_prompt': negative_prompt,
-                'width': width,
-                'height': height,
-                'num_frames': num_frames,
-                'num_inference_steps': num_inference_steps,
-                'fps': fps
-            }
+def queue_workflow(workflow):
+    """Queue a workflow to be processed by ComfyUI"""
+    data = json.dumps({"prompt": workflow}).encode("utf-8")
+    req = urllib.request.Request(f"http://{COMFY_HOST}/prompt", data=data)
+    return json.loads(urllib.request.urlopen(req).read())
 
-            # Update workflow with parameters
-            workflow = self.update_workflow(params)
+def get_history(prompt_id):
+    """Get workflow execution history"""
+    with urllib.request.urlopen(f"http://{COMFY_HOST}/history/{prompt_id}") as response:
+        return json.loads(response.read())
 
-            # Get or create event loop
-            try:
-                loop = asyncio.get_running_loop()
-            except RuntimeError:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
+def process_output_video(outputs, job_id):
+    """Process video outputs from ComfyUI"""
+    COMFY_OUTPUT_PATH = os.environ.get("COMFY_OUTPUT_PATH", "/app/ComfyUI/output")
 
-            # Execute workflow
-            outputs = loop.run_until_complete(self.execute_workflow(workflow))
+    # Find video in outputs
+    video_info = None
+    for node_id, node_output in outputs.items():
+        if "videos" in node_output:
+            video_info = node_output["videos"][0]
+            break
 
-            # Find the video output
-            video_path = None
-            for node_id, node_output in outputs.items():
-                if 'videos' in node_output:
-                    video_path = os.path.join(
-                        folder_paths.get_output_directory(),
-                        node_output['videos'][0]['filename']
-                    )
-                    break
+    if not video_info:
+        return {"status": "error", "message": "No video found in outputs"}
 
-            if not video_path or not os.path.exists(video_path):
-                raise RuntimeError("Video file not found in outputs")
+    # Construct video path
+    video_path = os.path.join(COMFY_OUTPUT_PATH, video_info.get("subfolder", ""), video_info["filename"])
+    print(f"runpod-worker-comfy - Looking for video at: {video_path}")
 
-            # Read video file
-            with open(video_path, 'rb') as f:
-                video_bytes = f.read()
+    if os.path.exists(video_path):
+        # Encode video
+        with open(video_path, 'rb') as f:
+            video_bytes = f.read()
+        video_b64 = base64.b64encode(video_bytes).decode('utf-8')
 
-            return video_bytes
+        print("runpod-worker-comfy - Video processed successfully")
+        return {
+            "status": "success",
+            "video": video_b64
+        }
+    else:
+        print("runpod-worker-comfy - Video file not found")
+        return {
+            "status": "error",
+            "message": f"Video file not found at: {video_path}"
+        }
 
-        except Exception as e:
-            raise RuntimeError(f"Video generation failed: {str(e)}")
-
-def encode_video_base64(video_bytes: bytes) -> str:
-    """Encode video bytes to base64 string"""
-    return base64.b64encode(video_bytes).decode('utf-8')
-
-# Initialize generator
-generator = HunyuanGenerator()
-
-def handler(event: Dict[str, Any]) -> Dict[str, Any]:
-    """Runpod handler function"""
+def handler(job):
+    """Main handler function"""
     try:
-        job_input = event["input"]
-
-        if "prompt" not in job_input:
+        job_input = job["input"]
+        if not job_input or "prompt" not in job_input:
             return {"error": "Missing required parameter: prompt"}
 
         # Extract parameters
@@ -195,40 +133,59 @@ def handler(event: Dict[str, Any]) -> Dict[str, Any]:
         # Validate parameters
         if width % 8 != 0 or height % 8 != 0:
             return {"error": "Width and height must be divisible by 8"}
-        if width * height > 1024 * 1024:  # 1MP limit
+        if width * height > 1024 * 1024:
             return {"error": "Resolution too high"}
         if num_frames > 120:
             return {"error": "Too many frames requested"}
 
-        start_time = time.time()
+        # Check if ComfyUI is available
+        if not check_server(f"http://{COMFY_HOST}"):
+            return {"error": "ComfyUI server not available"}
 
-        # Generate video
-        video_bytes = generator.generate(
-            prompt=prompt,
-            negative_prompt=negative_prompt,
-            width=width,
-            height=height,
-            num_frames=num_frames,
-            fps=fps,
-            num_inference_steps=num_inference_steps,
-            seed=seed
-        )
+        # Prepare and update workflow
+        generator = HunyuanGenerator()
+        workflow = generator.update_workflow({
+            "prompt": prompt,
+            "negative_prompt": negative_prompt,
+            "width": width,
+            "height": height,
+            "num_frames": num_frames,
+            "fps": fps,
+            "num_inference_steps": num_inference_steps
+        })
 
-        base64_video = encode_video_base64(video_bytes)
-        process_duration = time.time() - start_time
+        # Queue workflow
+        try:
+            queued = queue_workflow(workflow)
+            prompt_id = queued["prompt_id"]
+            print(f"runpod-worker-comfy - queued workflow with ID {prompt_id}")
+        except Exception as e:
+            return {"error": f"Error queuing workflow: {str(e)}"}
 
-        return {
-            "base64_video": base64_video,
-            "metadata": {
-                "fps": fps,
-                "duration": process_duration,
-                "resolution": {"height": height, "width": width},
-                "num_frames": num_frames
-            }
-        }
+        # Poll for completion
+        print("runpod-worker-comfy - waiting for video generation")
+        retries = 0
+        while retries < COMFY_POLLING_MAX_RETRIES:
+            history = get_history(prompt_id)
+
+            if prompt_id in history and history[prompt_id].get("outputs"):
+                # Process output video
+                result = process_output_video(history[prompt_id]["outputs"], job["id"])
+                if result["status"] == "success":
+                    return {
+                        "base64_video": result["video"],
+                        "refresh_worker": REFRESH_WORKER
+                    }
+                else:
+                    return {"error": result["message"]}
+
+            time.sleep(COMFY_POLLING_INTERVAL_MS / 1000)
+            retries += 1
+
+        return {"error": "Timeout waiting for video generation"}
 
     except Exception as e:
-        return {"error": str(e)}
+        return {"error": f"Unexpected error: {str(e)}"}
 
-# Start the serverless handler
-runpod.serverless.start({"handler": handler})
+if __name__ == "__main__":
+    runpod.serverless.start({"handler": handler})

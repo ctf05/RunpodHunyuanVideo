@@ -17,9 +17,10 @@ ENV PYTHONUNBUFFERED=1 \
     CUDA_DEVICE_ORDER=PCI_BUS_ID \
     DEBIAN_FRONTEND=noninteractive \
     HOST=0.0.0.0 \
-    COMFY_PORT=8188 \
     RECOMPUTE=True \
-    SAVE_MEMORY=True
+    SAVE_MEMORY=True \
+    COMFY_OUTPUT_PATH=/app/ComfyUI/output \
+    CMAKE_BUILD_PARALLEL_LEVEL=8
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -34,6 +35,7 @@ RUN apt-get update && apt-get install -y \
     libsm6 \
     libxext6 \
     libxrender-dev \
+    google-perftools \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -48,7 +50,8 @@ RUN mkdir -p /app/ComfyUI/models/diffusion_models \
     /app/ComfyUI/models/vae \
     /app/ComfyUI/models/clip/clip-vit-large-patch14 \
     /app/ComfyUI/models/LLM/llava-llama-3-8b-text-encoder-tokenizer \
-    /app/workflows
+    /app/workflows \
+    /app/ComfyUI/output
 
 # Download HunyuanVideo models
 RUN wget -O /app/ComfyUI/models/diffusion_models/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors \
@@ -66,22 +69,25 @@ RUN git clone https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokeniz
 
 # Copy application files
 COPY requirements.txt /app/
-COPY workflows/hyvideo_t2v_example_01.json /app/workflows/
 
 # Install Python dependencies
 RUN cd /app/ComfyUI && pip install -r requirements.txt
 RUN cd /app/ComfyUI/custom_nodes/hunyuan_wrapper && pip install -r requirements.txt
 RUN pip install -r requirements.txt
 
-# Copy handler
+COPY workflows/hyvideo_t2v_example_01.json /app/workflows/
 COPY handler.py /app/
+COPY start.sh /app/
+
+# Make start script executable
+RUN chmod +x /app/start.sh
 
 # Clean up
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Expose port 8080
-EXPOSE 8080
+# Expose port 8080 for RunPod and 8188 for ComfyUI
+EXPOSE 8080 8188
 
 # Set the entrypoint
-CMD ["python", "handler.py"]
+CMD ["/app/start.sh"]
