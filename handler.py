@@ -16,13 +16,13 @@ os.environ['PYTORCH_ENABLE_MPS_FALLBACK'] = '1'
 # Import ComfyUI components
 import folder_paths
 import execution
-from nodes import init_custom_nodes
+from nodes import init_extra_nodes
 import server
 
 # Initialize paths and configs
 def init_comfy():
     # Load custom nodes
-    init_custom_nodes()
+    init_extra_nodes(True)
 
     # Initialize server components without starting server
     server.PromptServer.instance = server.PromptServer()
@@ -177,5 +177,4 @@ def handler(event: Dict[str, Any]) -> Dict[str, Any]:
         return {"error": str(e)}
 
 # Start the serverless handler
-runpod.serverless.start({"handler": handler})
 runpod.serverless.start({"handler": handler})
