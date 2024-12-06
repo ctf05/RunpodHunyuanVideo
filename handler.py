@@ -47,8 +47,8 @@ class HunyuanGenerator:
             asyncio.set_event_loop(loop)
             server.PromptServer.instance = server.PromptServer(loop)
 
-            # Initialize executor
-            self.executor = PromptExecutor()
+            # Initialize executor with server instance
+            self.executor = PromptExecutor(server.PromptServer.instance)
 
             # Start server
             server.PromptServer.instance.start()
@@ -85,20 +85,15 @@ class HunyuanGenerator:
 
     async def execute_workflow(self, workflow: Dict) -> Dict:
         """Execute workflow and return results"""
-        prompt_id = await server.PromptServer.instance.prompt_queue.put(workflow)
+        # Format workflow for execution
+        prompt = {"prompt": workflow}
 
-        # Poll for completion
-        retries = 0
-        while retries < MAX_RETRIES:
-            if prompt_id in server.PromptServer.instance.prompt_queue.history:
-                history = server.PromptServer.instance.prompt_queue.history[prompt_id]
-                if 'outputs' in history:
-                    return history['outputs']
+        # Execute the workflow using the executor
+        outputs = await self.executor.execute_workflow(prompt)
+        if not outputs:
+            raise RuntimeError("No outputs from workflow execution")
 
-            await asyncio.sleep(RETRY_DELAY)
-            retries += 1
-
-        raise RuntimeError("Timeout waiting for workflow execution")
+        return outputs
 
     def generate(
             self,
