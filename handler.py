@@ -128,7 +128,6 @@ def handler(job):
         num_frames = job_input.get("num_frames", 16)
         fps = job_input.get("fps", 8)
         num_inference_steps = job_input.get("num_inference_steps", 30)
-        seed = job_input.get("seed", None)
 
         # Validate parameters
         if width % 8 != 0 or height % 8 != 0:

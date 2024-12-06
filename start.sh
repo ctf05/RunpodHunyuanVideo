@@ -5,7 +5,11 @@ TCMALLOC="$(ldconfig -p | grep -Po "libtcmalloc.so.\d" | head -n 1)"
 export LD_PRELOAD="${TCMALLOC}"
 
 echo "runpod-worker-hunyuan: Starting ComfyUI"
-python3 /app/ComfyUI/main.py --listen --port 8188 --disable-auto-launch &
+python /app/ComfyUI/main.py --disable-auto-launch --disable-metadata &
+
+# Wait for ComfyUI to initialize (10 seconds)
+echo "runpod-worker-hunyuan: Waiting for ComfyUI to initialize..."
+sleep 10
 
 echo "runpod-worker-hunyuan: Starting RunPod Handler"
-python3 -u /app/handler.py
+python -u /app/handler.py
