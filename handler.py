@@ -31,8 +31,8 @@ class HunyuanGenerator:
 
         # Replace all placeholders
         replacements = {
-            '|prompt|': params.get('prompt', ''),
-            '|negative_prompt|': params.get('negative_prompt', ''),
+            '|prompt|': params.get('prompt', 'high quality nature video of a red panda balancing on a bamboo stick while a bird lands on the panda\'s head, there\'s a waterfall in the background'),
+            '|negative_prompt|': params.get('negative_prompt', 'bad quality video'),
             '|width|': str(params.get('width', 512)),
             '|height|': str(params.get('height', 512)),
             '|num_frames|': str(params.get('num_frames', 16)),
