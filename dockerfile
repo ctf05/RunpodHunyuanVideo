@@ -46,8 +46,9 @@ RUN /usr/bin/yes | comfy --workspace /comfyui install --cuda-version 11.8 --nvid
 # Change to ComfyUI directory
 WORKDIR /comfyui
 
-# Install HunyuanVideo wrapper
-RUN git clone https://github.com/kijai/ComfyUI-HunyuanVideoWrapper.git custom_nodes/hunyuan_wrapper
+# Install custom nodes
+RUN git clone https://github.com/kijai/ComfyUI-HunyuanVideoWrapper.git custom_nodes/hunyuan_wrapper && \
+    git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git custom_nodes/video_helper_suite
 
 # Create necessary directories
 RUN mkdir -p models/diffusion_models \
@@ -77,6 +78,7 @@ WORKDIR /
 COPY requirements.txt /
 RUN pip install -r requirements.txt
 RUN cd /comfyui/custom_nodes/hunyuan_wrapper && pip install -r requirements.txt
+RUN cd /comfyui/custom_nodes/video_helper_suite && pip install -r requirements.txt
 
 # Copy application files
 COPY handler.py start.sh /
