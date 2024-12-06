@@ -45,13 +45,14 @@ class HunyuanGenerator:
             # Initialize server
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            server.PromptServer.instance = server.PromptServer(loop)
+
+            # Create server instance with explicit address and port
+            server_instance = server.PromptServer(loop)
+            server_instance.start('127.0.0.1', COMFY_PORT)
+            server.PromptServer.instance = server_instance
 
             # Initialize executor with server instance
             self.executor = PromptExecutor(server.PromptServer.instance)
-
-            # Start server
-            server.PromptServer.instance.start()
 
             self.initialized = True
 
