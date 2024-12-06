@@ -4,9 +4,6 @@ FROM runpod/pytorch:2.2.0-py3.10-cuda12.1.1-devel-ubuntu22.04
 # Switch to root for installations
 USER root
 
-# Set working directory
-WORKDIR /app
-
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -39,55 +36,60 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Install comfy-cli
+RUN pip install comfy-cli
+
 # Install ComfyUI
-RUN git clone https://github.com/comfyanonymous/ComfyUI.git /app/ComfyUI
+RUN /usr/bin/yes | comfy --workspace /comfyui install --cuda-version 11.8 --nvidia --version 0.2.7
+
+# Change to ComfyUI directory
+WORKDIR /comfyui
 
 # Install HunyuanVideo wrapper
-RUN git clone https://github.com/kijai/ComfyUI-HunyuanVideoWrapper.git /app/ComfyUI/custom_nodes/hunyuan_wrapper
+RUN git clone https://github.com/kijai/ComfyUI-HunyuanVideoWrapper.git custom_nodes/hunyuan_wrapper
 
-# Create necessary directories following HunyuanVideo requirements
-RUN mkdir -p /app/ComfyUI/models/diffusion_models \
-    /app/ComfyUI/models/vae \
-    /app/ComfyUI/models/clip/clip-vit-large-patch14 \
-    /app/ComfyUI/models/LLM/llava-llama-3-8b-text-encoder-tokenizer \
-    /app/workflows \
-    /app/ComfyUI/output
+# Create necessary directories
+RUN mkdir -p models/diffusion_models \
+    models/vae \
+    models/clip/clip-vit-large-patch14 \
+    models/LLM/llava-llama-3-8b-text-encoder-tokenizer \
+    output
 
 # Download HunyuanVideo models
-RUN wget -O /app/ComfyUI/models/diffusion_models/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors \
+RUN wget -O models/diffusion_models/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors \
     https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors && \
-    wget -O /app/ComfyUI/models/vae/hunyuan_video_vae_bf16.safetensors \
+    wget -O models/vae/hunyuan_video_vae_bf16.safetensors \
     https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_vae_bf16.safetensors
 
 # Download CLIP model
-RUN wget -O /app/ComfyUI/models/clip/clip-vit-large-patch14/model.safetensors \
+RUN wget -O models/clip/clip-vit-large-patch14/model.safetensors \
     https://huggingface.co/openai/clip-vit-large-patch14/resolve/main/model.safetensors
 
 # Clone LLM text encoder
 RUN git clone https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer \
-    /app/ComfyUI/models/LLM/llava-llama-3-8b-text-encoder-tokenizer
+    models/LLM/llava-llama-3-8b-text-encoder-tokenizer
+
+# Go back to root
+WORKDIR /
+
+# Install Python dependencies and custom nodes requirements
+COPY requirements.txt /
+RUN pip install -r requirements.txt
+RUN cd /comfyui/custom_nodes/hunyuan_wrapper && pip install -r requirements.txt
 
 # Copy application files
-COPY requirements.txt /app/
-
-# Install Python dependencies
-RUN cd /app/ComfyUI && pip install -r requirements.txt
-RUN cd /app/ComfyUI/custom_nodes/hunyuan_wrapper && pip install -r requirements.txt
-RUN pip install -r requirements.txt
-
-COPY workflows/hyvideo_t2v_example_01.json /app/workflows/
-COPY handler.py /app/
-COPY start.sh /app/
+COPY handler.py start.sh /
+COPY workflows/hyvideo_t2v_example_01.json /comfyui/workflows/
 
 # Make start script executable
-RUN chmod +x /app/start.sh
+RUN chmod +x /start.sh
 
 # Clean up
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Expose port 8080 for RunPod and 8188 for ComfyUI
+# Expose ports
 EXPOSE 8080 8188
 
 # Set the entrypoint
-CMD ["/app/start.sh"]
+CMD ["/start.sh"]
