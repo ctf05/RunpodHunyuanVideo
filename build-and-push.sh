@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "Pulling repo"
+git pull
+
 echo "Starting Docker build process..."
 docker build -t ctf05/runpodhunyuanvideo:latest .
 
