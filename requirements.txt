@@ -13,4 +13,8 @@ xformers
 omegaconf
 aiohttp
 fastapi
+uvicorn
+huggingface-hub
 importlib_metadata
+tqdm
+requests

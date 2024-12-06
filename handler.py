@@ -14,24 +14,21 @@ sys.path.append(comfy_path)
 os.environ['PYTORCH_ENABLE_MPS_FALLBACK'] = '1'
 
 # Import ComfyUI components
-import execution
-from nodes import init_extra_nodes
+import nodes
+import folder_paths
 import server
+from execution import PromptExecutor
 
-# Initialize paths and configs
-def init_comfy():
-    # Load custom nodes
-    init_extra_nodes(True)
-
-    # Initialize server components with event loop
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    server.PromptServer.instance = server.PromptServer(loop)
+# Constants
+COMFY_PORT = int(os.environ.get('COMFY_PORT', 8188))
+MAX_RETRIES = 100
+RETRY_DELAY = 0.5
 
 class HunyuanGenerator:
     def __init__(self):
         self.workflow_path = os.path.join(os.path.dirname(__file__), 'workflows/hyvideo_t2v_example_01.json')
         self.initialized = False
+        self.executor = None
         self.load_default_workflow()
 
     def load_default_workflow(self):
@@ -42,28 +39,66 @@ class HunyuanGenerator:
     def initialize(self):
         """Initialize ComfyUI if not already initialized"""
         if not self.initialized:
-            init_comfy()
+            # Load custom nodes
+            nodes.init_custom_nodes()
+
+            # Initialize server
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            server.PromptServer.instance = server.PromptServer(loop)
+
+            # Initialize executor
+            self.executor = PromptExecutor()
+
+            # Start server
+            server.PromptServer.instance.start()
+
             self.initialized = True
 
     def update_workflow(self, params: Dict[str, Any]) -> Dict:
         """Update workflow template with new parameters"""
         workflow = self.workflow_template.copy()
 
-        # Update text prompt nodes
-        text_node = next(node for node in workflow['nodes'] if node['type'] == 'HyVideoTextEncode')
+        # Update nodes dict to match actual workflow
+        nodes_dict = workflow['nodes']
+
+        # Update text encode node
+        text_node = next(node for node in nodes_dict if node['type'] == 'HyVideoTextEncode')
         if text_node:
             text_node['widgets_values'][0] = params.get('prompt', text_node['widgets_values'][0])
             text_node['widgets_values'][1] = params.get('negative_prompt', text_node['widgets_values'][1])
 
         # Update sampler node
-        sampler_node = next(node for node in workflow['nodes'] if node['type'] == 'HyVideoSampler')
+        sampler_node = next(node for node in nodes_dict if node['type'] == 'HyVideoSampler')
         if sampler_node:
             sampler_node['widgets_values'][0] = params.get('width', sampler_node['widgets_values'][0])
             sampler_node['widgets_values'][1] = params.get('height', sampler_node['widgets_values'][1])
             sampler_node['widgets_values'][2] = params.get('num_frames', sampler_node['widgets_values'][2])
             sampler_node['widgets_values'][3] = params.get('num_inference_steps', sampler_node['widgets_values'][3])
 
+        # Update video combine node
+        video_node = next(node for node in nodes_dict if node['type'] == 'VHS_VideoCombine')
+        if video_node:
+            video_node['widgets_values']['frame_rate'] = params.get('fps', video_node['widgets_values']['frame_rate'])
+
         return workflow
+
+    async def execute_workflow(self, workflow: Dict) -> Dict:
+        """Execute workflow and return results"""
+        prompt_id = await server.PromptServer.instance.prompt_queue.put(workflow)
+
+        # Poll for completion
+        retries = 0
+        while retries < MAX_RETRIES:
+            if prompt_id in server.PromptServer.instance.prompt_queue.history:
+                history = server.PromptServer.instance.prompt_queue.history[prompt_id]
+                if 'outputs' in history:
+                    return history['outputs']
+
+            await asyncio.sleep(RETRY_DELAY)
+            retries += 1
+
+        raise RuntimeError("Timeout waiting for workflow execution")
 
     def generate(
             self,
@@ -98,11 +133,28 @@ class HunyuanGenerator:
             # Update workflow with parameters
             workflow = self.update_workflow(params)
 
-            # Execute workflow
-            output = execution.execute_workflow(workflow)
+            # Create event loop if it doesn't exist
+            try:
+                loop = asyncio.get_event_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
 
-            # Get video path from the output
-            video_path = output['output_files'][0]
+            # Execute workflow
+            outputs = loop.run_until_complete(self.execute_workflow(workflow))
+
+            # Find the video output
+            video_path = None
+            for node_id, node_output in outputs.items():
+                if 'videos' in node_output:
+                    video_path = os.path.join(
+                        folder_paths.get_output_directory(),
+                        node_output['videos'][0]['filename']
+                    )
+                    break
+
+            if not video_path or not os.path.exists(video_path):
+                raise RuntimeError("Video file not found in outputs")
 
             # Read video file
             with open(video_path, 'rb') as f:

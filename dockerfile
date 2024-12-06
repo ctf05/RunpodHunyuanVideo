@@ -17,6 +17,7 @@ ENV PYTHONUNBUFFERED=1 \
     CUDA_DEVICE_ORDER=PCI_BUS_ID \
     DEBIAN_FRONTEND=noninteractive \
     HOST=0.0.0.0 \
+    COMFY_PORT=8188 \
     RECOMPUTE=True \
     SAVE_MEMORY=True
 
@@ -42,22 +43,24 @@ RUN git clone https://github.com/comfyanonymous/ComfyUI.git /app/ComfyUI
 # Install HunyuanVideo wrapper
 RUN git clone https://github.com/kijai/ComfyUI-HunyuanVideoWrapper.git /app/ComfyUI/custom_nodes/hunyuan_wrapper
 
-# Create necessary directories
+# Create necessary directories following HunyuanVideo requirements
 RUN mkdir -p /app/ComfyUI/models/diffusion_models \
     /app/ComfyUI/models/vae \
     /app/ComfyUI/models/clip/clip-vit-large-patch14 \
     /app/ComfyUI/models/LLM/llava-llama-3-8b-text-encoder-tokenizer \
     /app/workflows
 
-# Download models
+# Download HunyuanVideo models
 RUN wget -O /app/ComfyUI/models/diffusion_models/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors \
     https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors && \
     wget -O /app/ComfyUI/models/vae/hunyuan_video_vae_bf16.safetensors \
-    https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_vae_bf16.safetensors && \
-    wget -O /app/ComfyUI/models/clip/clip-vit-large-patch14/model.safetensors \
+    https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_vae_bf16.safetensors
+
+# Download CLIP model
+RUN wget -O /app/ComfyUI/models/clip/clip-vit-large-patch14/model.safetensors \
     https://huggingface.co/openai/clip-vit-large-patch14/resolve/main/model.safetensors
 
-# Clone text encoder model
+# Clone LLM text encoder
 RUN git clone https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer \
     /app/ComfyUI/models/LLM/llava-llama-3-8b-text-encoder-tokenizer
 
@@ -66,11 +69,11 @@ COPY requirements.txt /app/
 COPY workflows/hyvideo_t2v_example_01.json /app/workflows/
 
 # Install Python dependencies
-COPY requirements.txt /app/
 RUN cd /app/ComfyUI && pip install -r requirements.txt
 RUN cd /app/ComfyUI/custom_nodes/hunyuan_wrapper && pip install -r requirements.txt
 RUN pip install -r requirements.txt
 
+# Copy handler
 COPY handler.py /app/
 
 # Clean up
