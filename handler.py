@@ -3,9 +3,9 @@ import time
 import base64
 import runpod
 import torch
+import asyncio
 from typing import Dict, Any, Optional
 import json
-from pathlib import Path
 import sys
 
 # Add ComfyUI to path
@@ -14,7 +14,6 @@ sys.path.append(comfy_path)
 os.environ['PYTORCH_ENABLE_MPS_FALLBACK'] = '1'
 
 # Import ComfyUI components
-import folder_paths
 import execution
 from nodes import init_extra_nodes
 import server
@@ -24,9 +23,10 @@ def init_comfy():
     # Load custom nodes
     init_extra_nodes(True)
 
-    # Initialize server components without starting server
-    server.PromptServer.instance = server.PromptServer()
-    server.PromptServer.instance.loop = None
+    # Initialize server components with event loop
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    server.PromptServer.instance = server.PromptServer(loop)
 
 class HunyuanGenerator:
     def __init__(self):
