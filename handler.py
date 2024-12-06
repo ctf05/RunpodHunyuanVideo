@@ -17,7 +17,8 @@ REFRESH_WORKER = os.environ.get("REFRESH_WORKER", "false").lower() == "true"
 
 class HunyuanGenerator:
     def __init__(self):
-        self.workflow_path = os.path.join(os.path.dirname(__file__), 'workflows/hyvideo_t2v_example_01.json')
+        # Updated to use /comfyui path
+        self.workflow_path = '/comfyui/workflows/hyvideo_t2v_example_01.json'
         self.load_default_workflow()
 
     def load_default_workflow(self):
@@ -79,7 +80,8 @@ def get_history(prompt_id):
 
 def process_output_video(outputs, job_id):
     """Process video outputs from ComfyUI"""
-    COMFY_OUTPUT_PATH = os.environ.get("COMFY_OUTPUT_PATH", "/app/ComfyUI/output")
+    # Updated to use /comfyui path
+    COMFY_OUTPUT_PATH = os.environ.get("COMFY_OUTPUT_PATH", "/comfyui/output")
 
     # Find video in outputs
     video_info = None
