@@ -62,7 +62,7 @@ RUN git clone https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokeniz
     /app/ComfyUI/models/LLM/llava-llama-3-8b-text-encoder-tokenizer
 
 # Copy application files
-COPY handler.py requirements.txt /app/
+COPY requirements.txt /app/
 COPY workflows/hyvideo_t2v_example_01.json /app/workflows/
 
 # Install Python dependencies
@@ -70,6 +70,8 @@ COPY requirements.txt /app/
 RUN cd /app/ComfyUI && pip install -r requirements.txt
 RUN cd /app/ComfyUI/custom_nodes/hunyuan_wrapper && pip install -r requirements.txt
 RUN pip install -r requirements.txt
+
+COPY handler.py /app/
 
 # Clean up
 RUN apt-get clean && \
