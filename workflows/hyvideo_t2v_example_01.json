@@ -97,10 +97,10 @@
         "Node name for S&R": "HyVideoSampler"
       },
       "widgets_values": [
-        512,
-        320,
-        85,
-        30,
+        |width|,
+        |height|,
+        |num_frames|,
+        |steps|,
         6,
         9,
         6,
@@ -216,8 +216,8 @@
         "Node name for S&R": "HyVideoTextEncode"
       },
       "widgets_values": [
-        "high quality nature video of a red panda balancing on a bamboo stick while a bird lands on the panda's head, there's a waterfall in the background",
-        "bad quality video"
+        |prompt|,
+        |negative_prompt|,
       ]
     },
     {
@@ -270,7 +270,7 @@
         "Node name for S&R": "VHS_VideoCombine"
       },
       "widgets_values": {
-        "frame_rate": 16,
+        "frame_rate": |fps|,
         "loop_count": 0,
         "filename_prefix": "HunyuanVideo",
         "format": "video/h264-mp4",

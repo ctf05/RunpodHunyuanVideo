@@ -23,38 +23,27 @@ class HunyuanGenerator:
     def load_default_workflow(self):
         """Load the default workflow template"""
         with open(self.workflow_path, 'r') as f:
-            data = json.load(f)
-            # Transform the workflow to ComfyUI prompt format
-            workflow = {}
-            for node in data["nodes"]:
-                workflow[str(node["id"])] = {
-                    "class_type": node["type"],
-                    "inputs": {name: link.get("link") for name, link in node["inputs"].items()} if "inputs" in node else {},
-                    "widgets_values": node.get("widgets_values", [])
-                }
-            self.workflow_template = workflow
+            self.workflow_template = f.read()
 
     def update_workflow(self, params: dict) -> dict:
-        """Update workflow template with new parameters"""
-        workflow = json.loads(json.dumps(self.workflow_template))  # Deep copy
+        """Update workflow template with new parameters using string replacement"""
+        workflow_str = self.workflow_template
 
-        # Update text encode node (id 30)
-        if "30" in workflow:
-            workflow["30"]["widgets_values"][0] = params.get('prompt', workflow["30"]["widgets_values"][0])
-            workflow["30"]["widgets_values"][1] = params.get('negative_prompt', workflow["30"]["widgets_values"][1])
+        # Replace all placeholders
+        replacements = {
+            '|prompt|': params.get('prompt', ''),
+            '|negative_prompt|': params.get('negative_prompt', ''),
+            '|width|': str(params.get('width', 512)),
+            '|height|': str(params.get('height', 512)),
+            '|num_frames|': str(params.get('num_frames', 16)),
+            '|steps|': str(params.get('num_inference_steps', 30)),
+            '|fps|': str(params.get('fps', 8))
+        }
 
-        # Update sampler node (id 3)
-        if "3" in workflow:
-            workflow["3"]["widgets_values"][0] = params.get('width', workflow["3"]["widgets_values"][0])
-            workflow["3"]["widgets_values"][1] = params.get('height', workflow["3"]["widgets_values"][1])
-            workflow["3"]["widgets_values"][2] = params.get('num_frames', workflow["3"]["widgets_values"][2])
-            workflow["3"]["widgets_values"][3] = params.get('num_inference_steps', workflow["3"]["widgets_values"][3])
+        for placeholder, value in replacements.items():
+            workflow_str = workflow_str.replace(placeholder, value)
 
-        # Update video combine node (id 34)
-        if "34" in workflow and isinstance(workflow["34"]["widgets_values"], dict):
-            workflow["34"]["widgets_values"]["frame_rate"] = params.get('fps', workflow["34"]["widgets_values"]["frame_rate"])
-
-        return workflow
+        return json.loads(workflow_str)
 
 def check_server(url, retries=500, delay=50):
     """Check if ComfyUI server is reachable"""
