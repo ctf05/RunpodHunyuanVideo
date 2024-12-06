@@ -17,38 +17,42 @@ REFRESH_WORKER = os.environ.get("REFRESH_WORKER", "false").lower() == "true"
 
 class HunyuanGenerator:
     def __init__(self):
-        # Updated to use /comfyui path
         self.workflow_path = '/comfyui/workflows/hyvideo_t2v_example_01.json'
         self.load_default_workflow()
 
     def load_default_workflow(self):
         """Load the default workflow template"""
         with open(self.workflow_path, 'r') as f:
-            self.workflow_template = json.load(f)
+            data = json.load(f)
+            # Transform the workflow to ComfyUI prompt format
+            workflow = {}
+            for node in data["nodes"]:
+                workflow[str(node["id"])] = {
+                    "class_type": node["type"],
+                    "inputs": {name: link.get("link") for name, link in node["inputs"].items()} if "inputs" in node else {},
+                    "widgets_values": node.get("widgets_values", [])
+                }
+            self.workflow_template = workflow
 
     def update_workflow(self, params: dict) -> dict:
         """Update workflow template with new parameters"""
-        workflow = self.workflow_template.copy()
-        nodes_dict = workflow['nodes']
+        workflow = json.loads(json.dumps(self.workflow_template))  # Deep copy
 
-        # Update text encode node
-        text_node = next(node for node in nodes_dict if node['type'] == 'HyVideoTextEncode')
-        if text_node:
-            text_node['widgets_values'][0] = params.get('prompt', text_node['widgets_values'][0])
-            text_node['widgets_values'][1] = params.get('negative_prompt', text_node['widgets_values'][1])
+        # Update text encode node (id 30)
+        if "30" in workflow:
+            workflow["30"]["widgets_values"][0] = params.get('prompt', workflow["30"]["widgets_values"][0])
+            workflow["30"]["widgets_values"][1] = params.get('negative_prompt', workflow["30"]["widgets_values"][1])
 
-        # Update sampler node
-        sampler_node = next(node for node in nodes_dict if node['type'] == 'HyVideoSampler')
-        if sampler_node:
-            sampler_node['widgets_values'][0] = params.get('width', sampler_node['widgets_values'][0])
-            sampler_node['widgets_values'][1] = params.get('height', sampler_node['widgets_values'][1])
-            sampler_node['widgets_values'][2] = params.get('num_frames', sampler_node['widgets_values'][2])
-            sampler_node['widgets_values'][3] = params.get('num_inference_steps', sampler_node['widgets_values'][3])
+        # Update sampler node (id 3)
+        if "3" in workflow:
+            workflow["3"]["widgets_values"][0] = params.get('width', workflow["3"]["widgets_values"][0])
+            workflow["3"]["widgets_values"][1] = params.get('height', workflow["3"]["widgets_values"][1])
+            workflow["3"]["widgets_values"][2] = params.get('num_frames', workflow["3"]["widgets_values"][2])
+            workflow["3"]["widgets_values"][3] = params.get('num_inference_steps', workflow["3"]["widgets_values"][3])
 
-        # Update video combine node
-        video_node = next(node for node in nodes_dict if node['type'] == 'VHS_VideoCombine')
-        if video_node:
-            video_node['widgets_values']['frame_rate'] = params.get('fps', video_node['widgets_values']['frame_rate'])
+        # Update video combine node (id 34)
+        if "34" in workflow and isinstance(workflow["34"]["widgets_values"], dict):
+            workflow["34"]["widgets_values"]["frame_rate"] = params.get('fps', workflow["34"]["widgets_values"]["frame_rate"])
 
         return workflow
 
@@ -80,7 +84,6 @@ def get_history(prompt_id):
 
 def process_output_video(outputs, job_id):
     """Process video outputs from ComfyUI"""
-    # Updated to use /comfyui path
     COMFY_OUTPUT_PATH = os.environ.get("COMFY_OUTPUT_PATH", "/comfyui/output")
 
     # Find video in outputs
