@@ -40,7 +40,7 @@ class HunyuanGenerator:
         """Initialize ComfyUI if not already initialized"""
         if not self.initialized:
             # Load custom nodes
-            nodes.init_xtra_nodes()
+            nodes.init_extra_nodes()
 
             try:
                 loop = asyncio.get_running_loop()
