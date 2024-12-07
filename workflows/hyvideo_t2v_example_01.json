@@ -2,7 +2,7 @@
   "1": {
     "class_type": "HyVideoModelLoader",
     "inputs": {
-      "model": "hyvideo\\hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors",
+      "model": "hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors",
       "base_precision": "bf16",
       "quantization": "fp8_e4m3fn",
       "load_device": "main_device",
@@ -47,7 +47,8 @@
     "inputs": {
       "prompt": "|prompt|",
       "negative": "|negative_prompt|",
-      "force_offload": true
+      "force_offload": true,
+      "text_encoders": ["16", 0]
     }
   },
   "34": {
