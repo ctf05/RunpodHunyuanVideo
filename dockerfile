@@ -92,7 +92,7 @@ WORKDIR /
 
 # Install SageAttention
 RUN git clone https://github.com/thu-ml/SageAttention.git && \
-    cd sageattention && \
+    cd SageAttention && \
     pip install -e .
 
 # Install Python dependencies and custom nodes requirements
