@@ -41,7 +41,7 @@ RUN apt-get update && apt-get install -y \
 RUN pip install comfy-cli
 
 # Install ComfyUI
-RUN /usr/bin/yes | comfy --workspace /comfyui install --nvidia --version 0.3.7
+RUN /usr/bin/yes | comfy --workspace /comfyui install --version 0.3.7
 
 # Change to ComfyUI directory
 WORKDIR /comfyui
