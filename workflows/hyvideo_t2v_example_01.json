@@ -21,13 +21,16 @@
       "seed": 3,
       "control_after_generate": "fixed",
       "force_offload": true,
-      "denoise_strength": 1
+      "denoise_strength": 1,
+      "hyvid_embeds": ["30", 0],
+      "embedded_guidance_scale": 1,
+      "model": ["1", 0]
     }
   },
   "7": {
     "class_type": "HyVideoVAELoader",
     "inputs": {
-      "model_name": "hyvid\\hunyuan_video_vae_bf16.safetensors",
+      "model_name": "hunyuan_video_vae_bf16.safetensors",
       "precision": "fp16"
     }
   },
