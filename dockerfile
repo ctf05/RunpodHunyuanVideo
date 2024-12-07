@@ -63,9 +63,16 @@ RUN wget -O models/diffusion_models/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safe
     wget -O models/vae/hunyuan_video_vae_bf16.safetensors \
     https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_vae_bf16.safetensors
 
-# Download CLIP model
-RUN wget -O models/clip/clip-vit-large-patch14/model.safetensors \
-    https://huggingface.co/openai/clip-vit-large-patch14/resolve/main/model.safetensors
+# Download CLIP model and configuration files
+RUN cd models/clip/clip-vit-large-patch14 && \
+    wget https://huggingface.co/openai/clip-vit-large-patch14/resolve/main/model.safetensors && \
+    wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/config.json && \
+    wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/preprocessor_config.json && \
+    wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/special_tokens_map.json && \
+    wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/tokenizer.json && \
+    wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/tokenizer_config.json && \
+    wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/vocab.json && \
+    wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/merges.txt
 
 # Clone LLM text encoder
 RUN git clone https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer \
