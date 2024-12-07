@@ -1,5 +1,5 @@
 # Use RunPod PyTorch image as base
-FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
+FROM nvidia/cuda:12.6.0-cudnn8-devel-ubuntu22.04
 
 # Switch to root for installations
 USER root
@@ -41,7 +41,7 @@ RUN apt-get update && apt-get install -y \
 RUN pip install comfy-cli
 
 # Install ComfyUI
-RUN /usr/bin/yes | comfy --workspace /comfyui install --cuda-version 11.8 --nvidia --version 0.3.7
+RUN /usr/bin/yes | comfy --workspace /comfyui install --cuda-version 12.6 --nvidia --version 0.3.7
 
 # Change to ComfyUI directory
 WORKDIR /comfyui
