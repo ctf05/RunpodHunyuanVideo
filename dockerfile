@@ -6,6 +6,7 @@ USER root
 
 # Set environment variables
 # TORCH_CUDA_ARCH_LIST supports L4 A5000 RTX3090 RTX 4090 A6000 A40 L40 L40s 6000 Ada, can add more
+# Sageattention 1 optimized for 3090 and 4090 only
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_PREFER_BINARY=1 \
@@ -94,6 +95,7 @@ WORKDIR /
 
 # Install Python dependencies and custom nodes requirements
 COPY requirements.txt /
+RUN pip install sageattention
 RUN pip install -r requirements.txt
 RUN cd /comfyui/custom_nodes/hunyuan_wrapper && pip install -r requirements.txt
 RUN cd /comfyui/custom_nodes/video_helper_suite && pip install -r requirements.txt
