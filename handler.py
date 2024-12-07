@@ -75,14 +75,26 @@ def process_output_video(outputs, job_id):
     """Process video outputs from ComfyUI"""
     COMFY_OUTPUT_PATH = os.environ.get("COMFY_OUTPUT_PATH", "/comfyui/output")
 
-    # Find video in outputs
+    # Find video in outputs - try both 'videos' and 'video' keys
     video_info = None
     for node_id, node_output in outputs.items():
+        # Try both 'videos' and 'video' keys
         if "videos" in node_output:
             video_info = node_output["videos"][0]
             break
+        elif "video" in node_output:
+            video_info = node_output["video"]
+            break
+        # Also try checking for Filenames in case it's saved as a file
+        elif "Filenames" in node_output:
+            filenames = node_output["Filenames"]
+            if filenames and len(filenames) > 0:
+                video_info = {"filename": filenames[0]}
+                break
 
     if not video_info:
+        # Print outputs for debugging
+        print(f"runpod-worker-comfy - Available outputs: {outputs}")
         return {"status": "error", "message": "No video found in outputs"}
 
     # Construct video path
