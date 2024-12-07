@@ -4,7 +4,7 @@
     "inputs": {
       "model_name": "hyvideo/hunyuan_video_720_fp8_e4m3fn.safetensors",
       "base_precision": "bf16",
-      "load_device": "main_device",
+      "load_device": "offload_device",
       "quantization": "fp8_e4m3fn",
       "model": "hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors"
     }

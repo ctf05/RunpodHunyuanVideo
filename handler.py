@@ -35,7 +35,7 @@ class HunyuanGenerator:
             '|negative_prompt|': params.get('negative_prompt', 'bad quality video'),
             '|width|': str(params.get('width', 512)),
             '|height|': str(params.get('height', 512)),
-            '|num_frames|': str(params.get('num_frames', 16)),
+            '|num_frames|': str(params.get('num_frames', 17)),
             '|steps|': str(params.get('num_inference_steps', 30)),
             '|fps|': str(params.get('fps', 8))
         }
