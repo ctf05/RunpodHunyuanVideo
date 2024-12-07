@@ -93,9 +93,11 @@ RUN cd models/LLM/llava-llama-3-8b-text-encoder-tokenizer && \
 # Go back to root
 WORKDIR /
 
+# upgrade pip
+RUN python.exe -m pip install --upgrade pip
+
 # Install Python dependencies and custom nodes requirements
 COPY requirements.txt /
-RUN pip install sageattention
 RUN pip install -r requirements.txt
 RUN cd /comfyui/custom_nodes/hunyuan_wrapper && pip install -r requirements.txt
 RUN cd /comfyui/custom_nodes/video_helper_suite && pip install -r requirements.txt
