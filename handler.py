@@ -75,48 +75,43 @@ def process_output_video(outputs, job_id):
     """Process video outputs from ComfyUI"""
     COMFY_OUTPUT_PATH = os.environ.get("COMFY_OUTPUT_PATH", "/comfyui/output")
 
-    # Find video in outputs - try both 'videos' and 'video' keys
+    # Find gif outputs which contain video and workflow preview
     video_info = None
     for node_id, node_output in outputs.items():
-        # Try both 'videos' and 'video' keys
-        if "videos" in node_output:
-            video_info = node_output["videos"][0]
+        if "gifs" in node_output:
+            video_info = node_output["gifs"][0]
             break
-        elif "video" in node_output:
-            video_info = node_output["video"]
-            break
-        # Also try checking for Filenames in case it's saved as a file
-        elif "Filenames" in node_output:
-            filenames = node_output["Filenames"]
-            if filenames and len(filenames) > 0:
-                video_info = {"filename": filenames[0]}
-                break
 
     if not video_info:
-        # Print outputs for debugging
         print(f"runpod-worker-comfy - Available outputs: {outputs}")
         return {"status": "error", "message": "No video found in outputs"}
 
-    # Construct video path
+    # Construct paths
     video_path = os.path.join(COMFY_OUTPUT_PATH, video_info.get("subfolder", ""), video_info["filename"])
+    workflow_path = os.path.join(COMFY_OUTPUT_PATH, video_info.get("subfolder", ""), video_info["workflow"])
     print(f"runpod-worker-comfy - Looking for video at: {video_path}")
 
-    if os.path.exists(video_path):
-        # Encode video
+    if os.path.exists(video_path) and os.path.exists(workflow_path):
+        # Encode video and workflow preview
         with open(video_path, 'rb') as f:
             video_bytes = f.read()
-        video_b64 = base64.b64encode(video_bytes).decode('utf-8')
+        with open(workflow_path, 'rb') as f:
+            workflow_bytes = f.read()
 
-        print("runpod-worker-comfy - Video processed successfully")
+        video_b64 = base64.b64encode(video_bytes).decode('utf-8')
+        workflow_b64 = base64.b64encode(workflow_bytes).decode('utf-8')
+
+        print("runpod-worker-comfy - Video and workflow preview processed successfully")
         return {
             "status": "success",
-            "video": video_b64
+            "video": video_b64,
+            "workflow_preview": workflow_b64
         }
     else:
-        print("runpod-worker-comfy - Video file not found")
+        print("runpod-worker-comfy - Video or workflow preview file not found")
         return {
             "status": "error",
-            "message": f"Video file not found at: {video_path}"
+            "message": f"Files not found at: {video_path} or {workflow_path}"
         }
 
 def validate_frame_count(num_frames):
@@ -186,6 +181,7 @@ def handler(job):
                 if result["status"] == "success":
                     return {
                         "base64_video": result["video"],
+                        "base64_preview": result["workflow_preview"],
                         "refresh_worker": REFRESH_WORKER
                     }
                 else:
