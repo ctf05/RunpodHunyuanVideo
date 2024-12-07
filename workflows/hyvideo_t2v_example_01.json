@@ -4,9 +4,9 @@
     "inputs": {
       "model_name": "hyvideo/hunyuan_video_720_fp8_e4m3fn.safetensors",
       "base_precision": "bf16",
-      "load_device": "cuda",
+      "load_device": "main_device",
       "quantization": "fp8_e4m3fn",
-      "model": null
+      "model": "hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors"
     }
   },
   "3": {
@@ -27,7 +27,7 @@
   "7": {
     "class_type": "HyVideoVAELoader",
     "inputs": {
-      "model_name": "hyvid/hunyuan_video_vae_bf16.safetensors",
+      "model_name": "hunyuan_video_vae_bf16.safetensors",
       "precision": "fp16"
     }
   },
