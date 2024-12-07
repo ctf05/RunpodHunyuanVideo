@@ -3,9 +3,10 @@
     "class_type": "HyVideoModelLoader",
     "inputs": {
       "model_name": "hyvideo/hunyuan_video_720_fp8_e4m3fn.safetensors",
-      "precision": "bf16",
-      "attn_mode": "sageattn_varlen",
-      "offload": "offload_device"
+      "base_precision": "bf16",
+      "load_device": "cuda",
+      "quantization": "fp8_e4m3fn",
+      "model": null
     }
   },
   "3": {
@@ -17,21 +18,24 @@
       "height": |height|,
       "num_frames": |num_frames|,
       "steps": |steps|,
-      "cfg": 1.0
+      "seed": |seed|,
+      "flow_shift": 1,
+      "embedded_guidance_scale": 1,
+      "force_offload": false
     }
   },
   "7": {
     "class_type": "HyVideoVAELoader",
     "inputs": {
-      "vae_name": "hyvid/hunyuan_video_vae_bf16.safetensors",
+      "model_name": "hyvid/hunyuan_video_vae_bf16.safetensors",
       "precision": "fp16"
     }
   },
   "16": {
     "class_type": "DownloadAndLoadHyVideoTextEncoder",
     "inputs": {
-      "llm_path": "Kijai/llava-llama-3-8b-text-encoder-tokenizer",
-      "clip_path": "openai/clip-vit-large-patch14",
+      "clip_model": "openai/clip-vit-large-patch14",
+      "llm_model": "Kijai/llava-llama-3-8b-text-encoder-tokenizer",
       "precision": "fp16"
     }
   },
@@ -39,7 +43,7 @@
     "class_type": "HyVideoTextEncode",
     "inputs": {
       "text_encoders": ["16", 0],
-      "text": "|prompt|",
+      "prompt": "|prompt|",
       "negative": "|negative_prompt|"
     }
   },
@@ -47,7 +51,10 @@
     "class_type": "VHS_VideoCombine",
     "inputs": {
       "images": ["5", 0],
-      "fps": |fps|,
+      "frame_rate": |fps|,
+      "loop_count": 0,
+      "pingpong": false,
+      "save_output": true,
       "format": "video/h264-mp4",
       "filename_prefix": "HunyuanVideo"
     }
@@ -56,7 +63,9 @@
     "class_type": "HyVideoDecode",
     "inputs": {
       "vae": ["7", 0],
-      "samples": ["3", 0]
+      "samples": ["3", 0],
+      "enable_vae_tiling": true,
+      "temporal_tiling_sample_size": 8
     }
   }
 }
