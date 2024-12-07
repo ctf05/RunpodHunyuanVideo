@@ -24,7 +24,7 @@ ENV PYTHONUNBUFFERED=1 \
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    python3.12 \
+    python3.10 \
     python3-pip \
     python-is-python3 \
     git \
@@ -104,6 +104,11 @@ COPY requirements.txt /
 RUN pip install -r requirements.txt
 RUN cd /comfyui/custom_nodes/hunyuan_wrapper && pip install -r requirements.txt
 RUN cd /comfyui/custom_nodes/video_helper_suite && pip install -r requirements.txt
+
+# Install SageAttention from source
+RUN git clone https://github.com/juntang-zhuang/SageAttention.git && \
+    cd SageAttention && \
+    pip install .
 
 # Copy application files
 COPY handler.py start.sh /
