@@ -1,5 +1,5 @@
 # Use RunPod PyTorch image as base
-FROM nvidia/cuda:12.6.0-cudnn8-devel-ubuntu22.04
+FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu20.04
 
 # Switch to root for installations
 USER root
