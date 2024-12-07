@@ -4,6 +4,8 @@ FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu20.04
 # Switch to root for installations
 USER root
 
+RUN python3.9 --version
+
 # Set environment variables
 # TORCH_CUDA_ARCH_LIST supports L4 A5000 RTX3090 RTX 4090 A6000 A40 L40 L40s 6000 Ada, can add more
 # Sageattention 1 optimized for 3090 and 4090 only
