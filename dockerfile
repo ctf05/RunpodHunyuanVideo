@@ -92,11 +92,6 @@ RUN cd models/LLM/llava-llama-3-8b-text-encoder-tokenizer && \
 # Go back to root
 WORKDIR /
 
-# Install SageAttention
-RUN git clone https://github.com/thu-ml/SageAttention.git && \
-    cd SageAttention && \
-    pip install -e .
-
 # Install Python dependencies and custom nodes requirements
 COPY requirements.txt /
 RUN pip install -r requirements.txt
