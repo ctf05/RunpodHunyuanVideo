@@ -73,8 +73,6 @@ def get_history(prompt_id):
 
 def process_output_video(outputs, job_id):
     """Process video outputs from ComfyUI"""
-    COMFY_OUTPUT_PATH = os.environ.get("COMFY_OUTPUT_PATH", "/comfyui/output")
-
     # Find gif outputs which contain video and workflow preview
     video_info = None
     for node_id, node_output in outputs.items():
@@ -86,43 +84,15 @@ def process_output_video(outputs, job_id):
         print(f"runpod-worker-comfy - Available outputs: {outputs}")
         return {"status": "error", "message": "No video found in outputs"}
 
-    # Initial paths
-    video_filename = video_info["filename"]
-    workflow_filename = video_info["workflow"]
+    # Construct paths directly to known locations
+    video_path = f"/comfyui/output/{video_info['filename']}"
+    workflow_path = f"/comfyui/output/{video_info['workflow']}"
 
-    print(f"runpod-worker-comfy - Searching for files:")
-    print(f"Video: {video_filename}")
-    print(f"Workflow: {workflow_filename}")
+    print(f"runpod-worker-comfy - Looking for files:")
+    print(f"Video: {video_path}")
+    print(f"Workflow: {workflow_path}")
 
-    # List of directories to search
-    search_dirs = [
-        "/comfyui/output",
-        "/app/ComfyUI/output",
-        "/output",
-        "/comfyui",
-        "/app/ComfyUI",
-    ]
-
-    video_path = None
-    workflow_path = None
-
-    # Search each directory recursively
-    for base_dir in search_dirs:
-        print(f"runpod-worker-comfy - Searching in directory: {base_dir}")
-        if os.path.exists(base_dir):
-            for root, dirs, files in os.walk(base_dir):
-                if video_filename in files:
-                    video_path = os.path.join(root, video_filename)
-                    print(f"runpod-worker-comfy - Found video at: {video_path}")
-                if workflow_filename in files:
-                    workflow_path = os.path.join(root, workflow_filename)
-                    print(f"runpod-worker-comfy - Found workflow preview at: {workflow_path}")
-                if video_path and workflow_path:
-                    break
-        else:
-            print(f"runpod-worker-comfy - Directory does not exist: {base_dir}")
-
-    if video_path and workflow_path:
+    if os.path.exists(video_path) and os.path.exists(workflow_path):
         # Encode video and workflow preview
         with open(video_path, 'rb') as f:
             video_bytes = f.read()
@@ -140,9 +110,9 @@ def process_output_video(outputs, job_id):
         }
     else:
         missing = []
-        if not video_path:
+        if not os.path.exists(video_path):
             missing.append("video")
-        if not workflow_path:
+        if not os.path.exists(workflow_path):
             missing.append("workflow preview")
         print(f"runpod-worker-comfy - Could not find: {', '.join(missing)}")
         return {
