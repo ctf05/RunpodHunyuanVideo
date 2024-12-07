@@ -53,10 +53,13 @@
       "images": ["5", 0],
       "frame_rate": |fps|,
       "loop_count": 0,
-      "pingpong": false,
-      "save_output": true,
+      "filename_prefix": "HunyuanVideo",
       "format": "video/h264-mp4",
-      "filename_prefix": "HunyuanVideo"
+      "pix_fmt": "yuv420p",
+      "crf": 19,
+      "save_metadata": false,
+      "pingpong": false,
+      "save_output": true
     }
   },
   "5": {
