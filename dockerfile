@@ -25,8 +25,6 @@ ENV PYTHONUNBUFFERED=1 \
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     python3.12 \
-    python3.12-dev \
-    python3.12-distutils \
     python3-pip \
     python-is-python3 \
     git \
