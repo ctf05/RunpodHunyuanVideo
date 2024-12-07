@@ -107,6 +107,13 @@ def process_output_video(outputs, job_id):
             "message": f"Video file not found at: {video_path}"
         }
 
+def validate_frame_count(num_frames):
+    """Ensure frame count follows HunyuanVideo requirements"""
+    if (num_frames - 1) % 4 != 0:
+        # Round up to next valid frame count
+        num_frames = ((num_frames - 1) // 4 * 4) + 5
+    return num_frames
+
 def handler(job):
     """Main handler function"""
     try:
@@ -119,7 +126,7 @@ def handler(job):
         negative_prompt = job_input.get("negative_prompt", "")
         width = job_input.get("width", 512)
         height = job_input.get("height", 512)
-        num_frames = job_input.get("num_frames", 17)
+        num_frames = validate_frame_count(job_input.get("num_frames", 17))
         fps = job_input.get("fps", 8)
         num_inference_steps = job_input.get("num_inference_steps", 30)
 
