@@ -2,49 +2,49 @@
   "1": {
     "class_type": "HyVideoModelLoader",
     "inputs": {
-      "model_name": "hyvideo/hunyuan_video_720_fp8_e4m3fn.safetensors",
+      "model": "hyvideo\\hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors",
       "base_precision": "bf16",
-      "load_device": "offload_device",
       "quantization": "fp8_e4m3fn",
-      "model": "hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors"
+      "load_device": "main_device",
+      "attention_mode": "sageattn_varlen"
     }
   },
   "3": {
     "class_type": "HyVideoSampler",
     "inputs": {
-      "model": ["1", 0],
-      "hyvid_embeds": ["30", 0],
       "width": |width|,
       "height": |height|,
       "num_frames": |num_frames|,
       "steps": |steps|,
-      "seed": 0,
-      "flow_shift": 1,
-      "embedded_guidance_scale": 1,
-      "force_offload": false
+      "guidance_scale": 6,
+      "flow_shift": 9,
+      "seed": 3,
+      "control_after_generate": "fixed",
+      "force_offload": true,
+      "denoise_strength": 1
     }
   },
   "7": {
     "class_type": "HyVideoVAELoader",
     "inputs": {
-      "model_name": "hunyuan_video_vae_bf16.safetensors",
+      "model_name": "hyvid\\hunyuan_video_vae_bf16.safetensors",
       "precision": "fp16"
     }
   },
   "16": {
     "class_type": "DownloadAndLoadHyVideoTextEncoder",
     "inputs": {
-      "clip_model": "openai/clip-vit-large-patch14",
       "llm_model": "Kijai/llava-llama-3-8b-text-encoder-tokenizer",
+      "clip_model": "openai/clip-vit-large-patch14",
       "precision": "fp16"
     }
   },
   "30": {
     "class_type": "HyVideoTextEncode",
     "inputs": {
-      "text_encoders": ["16", 0],
       "prompt": "|prompt|",
-      "negative": "|negative_prompt|"
+      "negative": "|negative_prompt|",
+      "force_offload": true
     }
   },
   "34": {
@@ -68,7 +68,7 @@
       "vae": ["7", 0],
       "samples": ["3", 0],
       "enable_vae_tiling": true,
-      "temporal_tiling_sample_size": 8
+      "temporal_tiling_sample_size": 16
     }
   }
 }
