@@ -72,7 +72,7 @@
       "vae": ["7", 0],
       "samples": ["3", 0],
       "enable_vae_tiling": true,
-      "temporal_tiling_sample_size": 8
+      "temporal_tiling_sample_size": 16
     }
   }
 }
