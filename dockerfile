@@ -1,5 +1,4 @@
-# Use RunPod PyTorch image as base
-FROM runpod/base:0.6.2-cuda12.6.2
+FROM runpod/base:0.6.2-cuda12.1.0
 
 # Switch to root for installations
 USER root
