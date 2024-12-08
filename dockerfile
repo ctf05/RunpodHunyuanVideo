@@ -1,4 +1,5 @@
-FROM runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
+# Use RunPod PyTorch base image
+FROM runpod/pytorch:2.2.0-py3.11-cuda12.1.1-devel-ubuntu22.04
 
 # Switch to root for installations
 USER root
@@ -18,7 +19,8 @@ ENV PYTHONUNBUFFERED=1 \
     TORCH_CUDA_ARCH_LIST="8.6;8.9" \
     RECOMPUTE=True \
     SAVE_MEMORY=True \
-    COMFY_OUTPUT_PATH=/app/ComfyUI/output \
+    MAX_BATCH_SIZE=1 \
+    COMFY_OUTPUT_PATH=/comfyui/output \
     CMAKE_BUILD_PARALLEL_LEVEL=8
 
 # Install system dependencies
@@ -44,70 +46,61 @@ RUN pip install comfy-cli
 # Install ComfyUI
 RUN set +o pipefail && /usr/bin/yes | comfy --workspace /comfyui install --cuda-version 12.1 --nvidia --version 0.3.7 --skip-manager || true
 
-# Change to ComfyUI directory
+# Change to ComfyUI directory and install custom nodes
 WORKDIR /comfyui
-
-# Install custom nodes
 RUN git clone https://github.com/kijai/ComfyUI-HunyuanVideoWrapper.git custom_nodes/hunyuan_wrapper && \
     git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git custom_nodes/video_helper_suite
 
 # Create necessary directories
-RUN mkdir -p models/diffusion_models \
+RUN mkdir -p \
+    models/diffusion_models \
     models/vae \
     models/clip/clip-vit-large-patch14 \
     models/LLM/llava-llama-3-8b-text-encoder-tokenizer \
+    workflows \
     output
 
-# Download HunyuanVideo models
-RUN wget -O models/diffusion_models/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors \
-    https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors && \
-    wget -O models/vae/hunyuan_video_vae_bf16.safetensors \
-    https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_vae_bf16.safetensors
+# Download HunyuanVideo models with parallel downloads
+RUN wget -q -P models/diffusion_models/ \
+    https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors & \
+    wget -q -P models/vae/ \
+    https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_vae_bf16.safetensors & \
+    wait
 
-# Download CLIP model and configuration files
+# Download CLIP model files in parallel
 RUN cd models/clip/clip-vit-large-patch14 && \
-    wget https://huggingface.co/openai/clip-vit-large-patch14/resolve/main/model.safetensors && \
-    wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/config.json && \
-    wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/preprocessor_config.json && \
-    wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/special_tokens_map.json && \
-    wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/tokenizer.json && \
-    wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/tokenizer_config.json && \
-    wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/vocab.json && \
-    wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/merges.txt
+    wget -q https://huggingface.co/openai/clip-vit-large-patch14/resolve/main/model.safetensors & \
+    wget -q https://huggingface.co/openai/clip-vit-large-patch14/raw/main/config.json & \
+    wget -q https://huggingface.co/openai/clip-vit-large-patch14/raw/main/preprocessor_config.json & \
+    wget -q https://huggingface.co/openai/clip-vit-large-patch14/raw/main/special_tokens_map.json & \
+    wget -q https://huggingface.co/openai/clip-vit-large-patch14/raw/main/tokenizer.json & \
+    wget -q https://huggingface.co/openai/clip-vit-large-patch14/raw/main/tokenizer_config.json & \
+    wget -q https://huggingface.co/openai/clip-vit-large-patch14/raw/main/vocab.json & \
+    wget -q https://huggingface.co/openai/clip-vit-large-patch14/raw/main/merges.txt & \
+    wait
 
-# Download LLM text encoder and configuration files
+# Download LLM text encoder files in parallel
 RUN cd models/LLM/llava-llama-3-8b-text-encoder-tokenizer && \
-    wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/config.json && \
-    wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/generation_config.json && \
-    wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/model-00001-of-00004.safetensors && \
-    wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/model-00002-of-00004.safetensors && \
-    wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/model-00003-of-00004.safetensors && \
-    wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/model-00004-of-00004.safetensors && \
-    wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/model.safetensors.index.json && \
-    wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/special_tokens_map.json && \
-    wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/tokenizer.json && \
-    wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/tokenizer_config.json
+    wget -q https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/config.json & \
+    wget -q https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/generation_config.json & \
+    wget -q https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/model-00001-of-00004.safetensors & \
+    wget -q https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/model-00002-of-00004.safetensors & \
+    wget -q https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/model-00003-of-00004.safetensors & \
+    wget -q https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/model-00004-of-00004.safetensors & \
+    wget -q https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/model.safetensors.index.json & \
+    wget -q https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/special_tokens_map.json & \
+    wget -q https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/tokenizer.json & \
+    wget -q https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/tokenizer_config.json & \
+    wait
 
-# Go back to root
+# Return to root directory
 WORKDIR /
 
-RUN apt-get update && apt-get install -y \
-    apt-transport-https \
-    ca-certificates \
-    curl \
-    gnupg \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Update pip and its configuration
-RUN python -m pip install --upgrade pip && \
-    pip config set global.index-url https://pypi.org/simple
-
-# Install Python dependencies and custom nodes requirements
+# Copy requirements and install Python dependencies
 COPY requirements.txt /
-RUN pip install -r requirements.txt
-RUN cd /comfyui/custom_nodes/hunyuan_wrapper && pip install -r requirements.txt
-RUN cd /comfyui/custom_nodes/video_helper_suite && pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && \
+    cd /comfyui/custom_nodes/hunyuan_wrapper && pip install --no-cache-dir -r requirements.txt && \
+    cd /comfyui/custom_nodes/video_helper_suite && pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
 COPY handler.py start.sh /
@@ -115,10 +108,6 @@ COPY workflows/hyvideo_t2v_example_01.json /comfyui/workflows/
 
 # Make start script executable
 RUN chmod +x /start.sh
-
-# Clean up
-RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Expose ports
 EXPOSE 8080 8188
