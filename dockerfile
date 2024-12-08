@@ -46,7 +46,7 @@ RUN python --version && \
 RUN pip install comfy-cli
 
 # Install ComfyUI
-RUN /usr/bin/yes | comfy --workspace /comfyui install --cuda-version 12.6 --nvidia --version 0.3.7 --skip-manager
+RUN /usr/bin/yes | comfy --workspace /comfyui install --cuda-version 12.1 --nvidia --version 0.3.7 --skip-manager
 
 # Change to ComfyUI directory
 WORKDIR /comfyui
