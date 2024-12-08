@@ -105,7 +105,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Update pip and its configuration
-RUN python -m pip install --upgrade pip && \
+RUN python -m pip install --upgrade pip
 
 # Install Python dependencies and custom nodes requirements
 COPY requirements.txt /
