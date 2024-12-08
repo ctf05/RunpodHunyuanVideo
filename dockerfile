@@ -106,7 +106,7 @@ RUN apt-get update && apt-get install -y \
 
 # Update pip and its configuration
 RUN python -m pip install --upgrade pip && \
-    pip config set global.index-url https://pypi.org/simple && \
+    pip config set global.index-url https://pypi.org/simple
 
 # Install Python dependencies and custom nodes requirements
 COPY requirements.txt /
