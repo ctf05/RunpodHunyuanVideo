@@ -1,4 +1,4 @@
-runpod==1.4.0
+runpod
 requests>=2.31.0
 yarl==1.12.1
 opencv-python
