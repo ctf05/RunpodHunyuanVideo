@@ -3,4 +3,4 @@ requests>=2.31.0
 yarl==1.12.1
 opencv-python
 imageio-ffmpeg
-accelerate>=1.2.0
+sageattention
