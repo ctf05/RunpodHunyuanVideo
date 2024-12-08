@@ -42,7 +42,7 @@ RUN apt-get update && apt-get install -y \
 RUN pip install comfy-cli
 
 # Install ComfyUI
-RUN /usr/bin/yes | comfy --workspace /comfyui install --cuda-version 12.1--nvidia --version 0.3.7 --skip-manager
+RUN set +o pipefail && /usr/bin/yes | comfy --workspace /comfyui install --cuda-version 12.1 --nvidia --version 0.3.7 --skip-manager || true
 
 # Change to ComfyUI directory
 WORKDIR /comfyui
