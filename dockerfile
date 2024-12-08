@@ -96,8 +96,16 @@ RUN cd models/LLM/llava-llama-3-8b-text-encoder-tokenizer && \
 # Go back to root
 WORKDIR /
 
-# upgrade pip
-RUN pip install --upgrade pip
+RUN apt-get update && apt-get install -y \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Update pip and its configuration
+RUN python -m pip install --upgrade pip && \
 
 # Install Python dependencies and custom nodes requirements
 COPY requirements.txt /
