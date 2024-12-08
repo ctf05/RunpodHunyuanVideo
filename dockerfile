@@ -19,7 +19,6 @@ ENV PYTHONUNBUFFERED=1 \
     TORCH_CUDA_ARCH_LIST="8.6;8.9" \
     RECOMPUTE=True \
     SAVE_MEMORY=True \
-    MAX_BATCH_SIZE=1 \
     COMFY_OUTPUT_PATH=/comfyui/output \
     CMAKE_BUILD_PARALLEL_LEVEL=8
 
@@ -61,10 +60,10 @@ RUN mkdir -p \
     output
 
 # Download HunyuanVideo models with parallel downloads
-RUN wget -q -P models/diffusion_models/ \
-    https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors & \
-    wget -q -P models/vae/ \
-    https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_vae_bf16.safetensors & \
+RUN wget -O models/diffusion_models/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors \
+    https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors && \
+    wget -O models/vae/hunyuan_video_vae_bf16.safetensors \
+    https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_vae_bf16.safetensors
     wait
 
 # Download CLIP model files in parallel
@@ -98,9 +97,9 @@ WORKDIR /
 
 # Copy requirements and install Python dependencies
 COPY requirements.txt /
-RUN pip install --no-cache-dir -r requirements.txt && \
-    cd /comfyui/custom_nodes/hunyuan_wrapper && pip install --no-cache-dir -r requirements.txt && \
-    cd /comfyui/custom_nodes/video_helper_suite && pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+RUN cd /comfyui/custom_nodes/hunyuan_wrapper && pip install --no-cache-dir -r requirements.txt
+RUN cd /comfyui/custom_nodes/video_helper_suite && pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
 COPY handler.py start.sh /
@@ -108,6 +107,10 @@ COPY workflows/hyvideo_t2v_example_01.json /comfyui/workflows/
 
 # Make start script executable
 RUN chmod +x /start.sh
+
+# Clean up
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Expose ports
 EXPOSE 8080 8188
