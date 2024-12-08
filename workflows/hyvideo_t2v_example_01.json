@@ -31,7 +31,7 @@
     "class_type": "HyVideoVAELoader",
     "inputs": {
       "model_name": "hunyuan_video_vae_bf16.safetensors",
-      "precision": "bf16"
+      "precision": "fp16"
     }
   },
   "16": {
