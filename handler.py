@@ -6,7 +6,6 @@ import time
 import os
 import requests
 import base64
-import torch
 
 # Constants for ComfyUI interaction
 COMFY_API_AVAILABLE_INTERVAL_MS = 50
@@ -19,9 +18,6 @@ REFRESH_WORKER = os.environ.get("REFRESH_WORKER", "false").lower() == "true"
 class HunyuanGenerator:
     def __init__(self):
         self.workflow_path = '/comfyui/workflows/hyvideo_t2v_example_01.json'
-        # Enable memory efficient attention
-        torch.backends.cuda.enable_mem_efficient_sdp(True)
-        torch.backends.cuda.enable_flash_sdp(True)
         self.load_default_workflow()
 
     def load_default_workflow(self):
