@@ -59,38 +59,34 @@ RUN mkdir -p \
     workflows \
     output
 
-# Download HunyuanVideo models with parallel downloads
+# Download HunyuanVideo models
 RUN wget -O models/diffusion_models/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors \
     https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors && \
     wget -O models/vae/hunyuan_video_vae_bf16.safetensors \
     https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_vae_bf16.safetensors
-    wait
 
-# Download CLIP model files in parallel
+# Download CLIP model and configuration files
 RUN cd models/clip/clip-vit-large-patch14 && \
-    wget -q https://huggingface.co/openai/clip-vit-large-patch14/resolve/main/model.safetensors & \
-    wget -q https://huggingface.co/openai/clip-vit-large-patch14/raw/main/config.json & \
-    wget -q https://huggingface.co/openai/clip-vit-large-patch14/raw/main/preprocessor_config.json & \
-    wget -q https://huggingface.co/openai/clip-vit-large-patch14/raw/main/special_tokens_map.json & \
-    wget -q https://huggingface.co/openai/clip-vit-large-patch14/raw/main/tokenizer.json & \
-    wget -q https://huggingface.co/openai/clip-vit-large-patch14/raw/main/tokenizer_config.json & \
-    wget -q https://huggingface.co/openai/clip-vit-large-patch14/raw/main/vocab.json & \
-    wget -q https://huggingface.co/openai/clip-vit-large-patch14/raw/main/merges.txt & \
-    wait
-
-# Download LLM text encoder files in parallel
+    wget https://huggingface.co/openai/clip-vit-large-patch14/resolve/main/model.safetensors && \
+    wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/config.json && \
+    wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/preprocessor_config.json && \
+    wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/special_tokens_map.json && \
+    wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/tokenizer.json && \
+    wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/tokenizer_config.json && \
+    wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/vocab.json && \
+    wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/merges.txt
+# Download LLM text encoder and configuration files
 RUN cd models/LLM/llava-llama-3-8b-text-encoder-tokenizer && \
-    wget -q https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/config.json & \
-    wget -q https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/generation_config.json & \
-    wget -q https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/model-00001-of-00004.safetensors & \
-    wget -q https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/model-00002-of-00004.safetensors & \
-    wget -q https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/model-00003-of-00004.safetensors & \
-    wget -q https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/model-00004-of-00004.safetensors & \
-    wget -q https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/model.safetensors.index.json & \
-    wget -q https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/special_tokens_map.json & \
-    wget -q https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/tokenizer.json & \
-    wget -q https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/tokenizer_config.json & \
-    wait
+    wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/config.json && \
+    wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/generation_config.json && \
+    wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/model-00001-of-00004.safetensors && \
+    wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/model-00002-of-00004.safetensors && \
+    wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/model-00003-of-00004.safetensors && \
+    wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/model-00004-of-00004.safetensors && \
+    wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/model.safetensors.index.json && \
+    wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/special_tokens_map.json && \
+    wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/tokenizer.json && \
+    wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/tokenizer_config.json
 
 # Return to root directory
 WORKDIR /
