@@ -1,4 +1,4 @@
-FROM runpod/base:0.6.2-cuda12.6.2
+FROM runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
 
 # Switch to root for installations
 USER root
