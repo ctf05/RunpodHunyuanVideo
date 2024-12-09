@@ -1,15 +1,4 @@
 {
-  "35": {
-    "class_type": "HyVideoBlockSwap",
-    "inputs": {
-      "block_num": 20,
-      "device": 0,
-      "double_blocks_to_swap": 20,
-      "single_blocks_to_swap": 20,
-      "offload_img_in": true,
-      "offload_txt_in": true
-    }
-  },
   "1": {
     "class_type": "HyVideoModelLoader",
     "inputs": {
@@ -17,8 +6,7 @@
       "base_precision": "bf16",
       "quantization": "fp8_e4m3fn",
       "load_device": "offload_device",
-      "attention_mode": "sageattn_varlen",
-      "block_swap_args": ["35", 0]
+      "attention_mode": "sageattn_varlen"
 
     }
   },
