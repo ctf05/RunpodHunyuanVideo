@@ -16,7 +16,7 @@
       "height": |height|,
       "num_frames": |num_frames|,
       "steps": |steps|,
-      "guidance_scale": 6,
+      "guidance_scale": 2.5,
       "flow_shift": 9,
       "seed": 3,
       "control_after_generate": "fixed",
