@@ -55,6 +55,7 @@ def wait_for_comfyui_ready():
             data = json.dumps({"prompt": {}}).encode("utf-8")
             print("checking comfyui")
             req = urllib.request.Request(f"http://{COMFY_HOST}/prompt", data=data)
+            print(req)
             response = urllib.request.urlopen(req)
             print(response)
             print(f"ComfyUI response: {response.read().decode('utf-8')}")
