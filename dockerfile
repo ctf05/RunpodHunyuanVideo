@@ -59,12 +59,6 @@ RUN mkdir -p \
     workflows \
     output
 
-# Download HunyuanVideo models
-RUN wget -O models/diffusion_models/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors \
-    https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors && \
-    wget -O models/vae/hunyuan_video_vae_bf16.safetensors \
-    https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_vae_bf16.safetensors
-
 # Download CLIP model and configuration files
 RUN cd models/clip/clip-vit-large-patch14 && \
     wget https://huggingface.co/openai/clip-vit-large-patch14/resolve/main/model.safetensors && \
@@ -89,6 +83,19 @@ RUN cd models/LLM/llava-llama-3-8b-text-encoder-tokenizer && \
     wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/tokenizer.json && \
     wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/tokenizer_config.json
 
+# Add model selection arguments
+ARG USE_SMALL_MODEL=true
+ARG USE_BLOCK_SWAPPING=true
+
+# Download HunyuanVideo models based on selection
+RUN if [ "$USE_SMALL_MODEL" = "true" ] ; then \
+    wget -O models/diffusion_models/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors && \
+    wget -O models/vae/hunyuan_video_vae_bf16.safetensors https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_vae_bf16.safetensors; \
+    else \
+    wget -O models/diffusion_models/hunyuan_video_720_cfgdistill_bf16.safetensors https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_cfgdistill_bf16.safetensors && \
+    wget -O models/vae/hunyuan_video_vae_fp32.safetensors https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_vae_fp32.safetensors; \
+    fi
+
 # Return to root directory
 WORKDIR /
 
@@ -100,7 +107,16 @@ RUN cd /comfyui/custom_nodes/video_helper_suite && pip install --no-cache-dir -r
 
 # Copy application files
 COPY handler.py start.sh /
-COPY workflows/hyvideo_t2v_example_01.json /comfyui/workflows/
+# Select appropriate workflow
+RUN if [ "$USE_SMALL_MODEL" = "true" ] && [ "$USE_BLOCK_SWAPPING" = "true" ]; then \
+    COPY workflows/small_model_block_swapping.json /comfyui/workflows/workflow.json; \
+    elif [ "$USE_SMALL_MODEL" = "true" ] && [ "$USE_BLOCK_SWAPPING" = "false" ]; then \
+    COPY workflows/small_model_no_block_swapping.json /comfyui/workflows/workflow.json; \
+    elif [ "$USE_SMALL_MODEL" = "false" ] && [ "$USE_BLOCK_SWAPPING" = "true" ]; then \
+    COPY workflows/large_model_block_swapping.json /comfyui/workflows/workflow.json; \
+    else \
+    COPY workflows/large_model_no_block_swapping.json /comfyui/workflows/workflow.json; \
+    fi
 
 # Make start script executable
 RUN chmod +x /start.sh
