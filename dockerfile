@@ -107,15 +107,17 @@ RUN cd /comfyui/custom_nodes/video_helper_suite && pip install --no-cache-dir -r
 
 # Copy application files
 COPY handler.py start.sh /
+COPY workflows/*.json /comfyui/workflows/
+
 # Select appropriate workflow
 RUN if [ "$USE_SMALL_MODEL" = "true" ] && [ "$USE_BLOCK_SWAPPING" = "true" ]; then \
-    COPY workflows/small_model_block_swapping.json /comfyui/workflows/workflow.json; \
+    mv /comfyui/workflows/small_model_block_swapping.json /comfyui/workflows/workflow.json; \
     elif [ "$USE_SMALL_MODEL" = "true" ] && [ "$USE_BLOCK_SWAPPING" = "false" ]; then \
-    COPY workflows/small_model_no_block_swapping.json /comfyui/workflows/workflow.json; \
+    mv /comfyui/workflows/small_model_no_block_swapping.json /comfyui/workflows/workflow.json; \
     elif [ "$USE_SMALL_MODEL" = "false" ] && [ "$USE_BLOCK_SWAPPING" = "true" ]; then \
-    COPY workflows/large_model_block_swapping.json /comfyui/workflows/workflow.json; \
+    mv /comfyui/workflows/large_model_block_swapping.json /comfyui/workflows/workflow.json; \
     else \
-    COPY workflows/large_model_no_block_swapping.json /comfyui/workflows/workflow.json; \
+    mv /comfyui/workflows/large_model_no_block_swapping.json /comfyui/workflows/workflow.json; \
     fi
 
 # Make start script executable
