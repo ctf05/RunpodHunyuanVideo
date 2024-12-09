@@ -49,22 +49,22 @@ class HunyuanGenerator:
 
 def wait_for_comfyui_ready():
     """Wait for ComfyUI to be fully initialized and ready"""
-    for _ in range(COMFY_API_AVAILABLE_MAX_RETRIES):
+    for i in range(COMFY_API_AVAILABLE_MAX_RETRIES):
         try:
-            response = requests.get(f"http://{COMFY_HOST}/system_stats")
-            # First verify basic connectivity
-            if response.status_code != 200:
-                time.sleep(COMFY_API_AVAILABLE_INTERVAL_MS / 1000)
-                continue
+            # Test prompt endpoint with empty prompt
+            data = json.dumps({"prompt": {}}).encode("utf-8")
+            req = urllib.request.Request(f"http://{COMFY_HOST}/prompt", data=data)
+            response = urllib.request.urlopen(req)
 
-            # Then check if we get valid stats back
-            stats = response.json()
-            if isinstance(stats, dict) and "has_cuda" in stats:
-                print("ComfyUI fully initialized and ready")
+            if response.status == 200:
+                print(f"ComfyUI ready after {i+1} attempts")
                 return True
-        except:
-            pass
-        time.sleep(COMFY_API_AVAILABLE_INTERVAL_MS / 1000)
+        except Exception as e:
+            if i == 0:  # Only print on first attempt
+                print(f"Waiting for ComfyUI to initialize...")
+            time.sleep(COMFY_API_AVAILABLE_INTERVAL_MS / 1000)
+            continue
+    print("Failed to confirm ComfyUI readiness")
     return False
 
 def check_server(url, retries=500, delay=50):
