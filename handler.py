@@ -146,10 +146,8 @@ def handler(job):
         # Validate parameters
         if width % 8 != 0 or height % 8 != 0:
             return {"error": "Width and height must be divisible by 8"}
-        if width * height > 1024 * 1024:
-            return {"error": "Resolution too high"}
-        if num_frames > 120:
-            return {"error": "Too many frames requested"}
+        if width * height > 1024 * 592 * 72:
+            return {"error": "Resolution * num_frames too high"}
 
         # Check if ComfyUI is available
         if not check_server(f"http://{COMFY_HOST}"):

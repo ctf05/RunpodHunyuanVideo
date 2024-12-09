@@ -31,7 +31,7 @@
     "class_type": "HyVideoVAELoader",
     "inputs": {
       "model_name": "hunyuan_video_vae_bf16.safetensors",
-      "precision": "bf16"
+      "precision": "fp16"
     }
   },
   "16": {
@@ -39,7 +39,7 @@
     "inputs": {
       "llm_model": "Kijai/llava-llama-3-8b-text-encoder-tokenizer",
       "clip_model": "openai/clip-vit-large-patch14",
-      "precision": "bf16",
+      "precision": "fp16",
       "quantization": "bnb_nf4"
     }
   },
@@ -73,7 +73,7 @@
       "vae": ["7", 0],
       "samples": ["3", 0],
       "enable_vae_tiling": true,
-      "temporal_tiling_sample_size": 8
+      "temporal_tiling_sample_size": 16
     }
   }
 }

@@ -75,6 +75,7 @@ RUN cd models/clip/clip-vit-large-patch14 && \
     wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/tokenizer_config.json && \
     wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/vocab.json && \
     wget https://huggingface.co/openai/clip-vit-large-patch14/raw/main/merges.txt
+
 # Download LLM text encoder and configuration files
 RUN cd models/LLM/llava-llama-3-8b-text-encoder-tokenizer && \
     wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/config.json && \
