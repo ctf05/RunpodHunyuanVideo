@@ -13,7 +13,7 @@
       "base_precision": "bf16",
       "quantization": "fp8_e4m3fn",
       "load_device": "main_device",
-      "attention_mode": "sageattn_varlen",
+      "attention_mode": "sdpa",
       "block_swap_args": ["35", 0]
 
     }
