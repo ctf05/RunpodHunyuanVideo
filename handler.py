@@ -157,6 +157,9 @@ def handler(job):
         if not check_server(f"http://{COMFY_HOST}"):
             return {"error": "ComfyUI server not available"}
 
+        # Clear history
+        requests.post(f"http://{COMFY_HOST}/history", json={"clear": True})
+
         # Prepare and update workflow
         generator = HunyuanGenerator()
         workflow = generator.update_workflow({
