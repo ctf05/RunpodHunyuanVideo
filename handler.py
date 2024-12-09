@@ -47,32 +47,6 @@ class HunyuanGenerator:
 
         return json.loads(workflow_str)
 
-def wait_for_comfyui_ready():
-    """Wait for ComfyUI to be fully initialized and ready"""
-    for i in range(COMFY_API_AVAILABLE_MAX_RETRIES):
-        try:
-            # Test prompt endpoint with empty prompt
-            data = json.dumps({"prompt": {}}).encode("utf-8")
-            print("checking comfyui")
-            req = urllib.request.Request(f"http://{COMFY_HOST}/prompt", data=data)
-            print(req)
-            response = urllib.request.urlopen(req)
-            print(response)
-            print(f"ComfyUI response: {response.read().decode('utf-8')}")
-            print(f"ComfyUI response code: {response.getcode()}")
-
-            response_data = json.loads(response.read().decode('utf-8'))
-            if isinstance(response_data, dict) and response_data.get('type') == 'prompt_no_outputs':
-                print(f"ComfyUI ready after {i+1} attempts")
-                return True
-        except Exception as e:
-            if i == 0:  # Only print on first attempt
-                print(f"Waiting for ComfyUI to initialize...")
-            time.sleep(COMFY_API_AVAILABLE_INTERVAL_MS / 1000)
-            continue
-    print("Failed to confirm ComfyUI readiness")
-    return False
-
 def check_server(url, retries=500, delay=50):
     """Check if ComfyUI server is reachable"""
     for i in range(retries):
@@ -158,10 +132,6 @@ def validate_frame_count(num_frames):
 def handler(job):
     """Main handler function"""
     try:
-        # Wait for ComfyUI to be fully initialized
-        if not wait_for_comfyui_ready():
-            return {"error": "ComfyUI not fully initialized after waiting"}
-
         job_input = job["input"]
         if not job_input or "prompt" not in job_input:
             return {"error": "Missing required parameter: prompt"}
