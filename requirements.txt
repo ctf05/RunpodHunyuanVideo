@@ -4,3 +4,4 @@ yarl==1.12.1
 opencv-python
 imageio-ffmpeg
 sageattention
+bitsandbytes>=0.41.1
