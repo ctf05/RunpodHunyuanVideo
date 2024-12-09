@@ -54,7 +54,7 @@ def wait_for_comfyui_ready():
             response = requests.get(f"http://{COMFY_HOST}/system_stats")
             # First verify basic connectivity
             if response.status_code != 200:
-                time.sleep(COMFY_API_AVAILABLE_INTERVAL_MS)
+                time.sleep(COMFY_API_AVAILABLE_INTERVAL_MS / 1000)
                 continue
 
             # Then check if we get valid stats back
@@ -64,7 +64,7 @@ def wait_for_comfyui_ready():
                 return True
         except:
             pass
-        time.sleep(COMFY_API_AVAILABLE_INTERVAL_MS)
+        time.sleep(COMFY_API_AVAILABLE_INTERVAL_MS / 1000)
     return False
 
 def check_server(url, retries=500, delay=50):
