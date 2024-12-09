@@ -135,8 +135,8 @@ def handler(job):
             return {"error": "Missing required parameter: prompt"}
 
         # Extract parameters
-        prompt = job_input["prompt"]
-        negative_prompt = job_input.get("negative_prompt", "")
+        prompt = job_input["prompt", "high quality nature video of a red panda balancing on a bamboo stick while a bird lands on the panda's head, there's a waterfall in the background"]
+        negative_prompt = job_input.get("negative_prompt", "bad quality video")
         width = job_input.get("width", 512)
         height = job_input.get("height", 288)
         num_frames = validate_frame_count(job_input.get("num_frames", 17))
