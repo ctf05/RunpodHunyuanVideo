@@ -8,8 +8,8 @@ import requests
 import base64
 
 # Constants for ComfyUI interaction
-COMFY_API_AVAILABLE_INTERVAL_MS = 50
-COMFY_API_AVAILABLE_MAX_RETRIES = 500
+COMFY_API_AVAILABLE_INTERVAL_MS = 100
+COMFY_API_AVAILABLE_MAX_RETRIES = 1000
 COMFY_POLLING_INTERVAL_MS = 250
 COMFY_POLLING_MAX_RETRIES = 50000
 COMFY_HOST = "127.0.0.1:8188"
@@ -46,6 +46,26 @@ class HunyuanGenerator:
             workflow_str = workflow_str.replace(placeholder, value)
 
         return json.loads(workflow_str)
+
+def wait_for_comfyui_ready():
+    """Wait for ComfyUI to be fully initialized and ready"""
+    for _ in range(COMFY_API_AVAILABLE_MAX_RETRIES):
+        try:
+            response = requests.get(f"http://{COMFY_HOST}/system_stats")
+            # First verify basic connectivity
+            if response.status_code != 200:
+                time.sleep(COMFY_API_AVAILABLE_INTERVAL_MS)
+                continue
+
+            # Then check if we get valid stats back
+            stats = response.json()
+            if isinstance(stats, dict) and "has_cuda" in stats:
+                print("ComfyUI fully initialized and ready")
+                return True
+        except:
+            pass
+        time.sleep(COMFY_API_AVAILABLE_INTERVAL_MS)
+    return False
 
 def check_server(url, retries=500, delay=50):
     """Check if ComfyUI server is reachable"""
@@ -132,6 +152,10 @@ def validate_frame_count(num_frames):
 def handler(job):
     """Main handler function"""
     try:
+        # Wait for ComfyUI to be fully initialized
+        if not wait_for_comfyui_ready():
+            return {"error": "ComfyUI not fully initialized after waiting"}
+
         job_input = job["input"]
         if not job_input or "prompt" not in job_input:
             return {"error": "Missing required parameter: prompt"}
