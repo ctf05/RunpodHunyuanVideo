@@ -31,13 +31,15 @@ class HunyuanGenerator:
 
         # Replace all placeholders
         replacements = {
-            '|prompt|': params.get('prompt', 'high quality nature video of a red panda balancing on a bamboo stick while a bird lands on the panda\'s head, there\'s a waterfall in the background'),
-            '|negative_prompt|': params.get('negative_prompt', 'bad quality video'),
-            '|width|': str(params.get('width', 512)),
-            '|height|': str(params.get('height', 512)),
-            '|num_frames|': str(params.get('num_frames', 17)),
-            '|steps|': str(params.get('num_inference_steps', 30)),
-            '|fps|': str(params.get('fps', 8))
+            '|prompt|': params.get('prompt'),
+            '|negative_prompt|': params.get('negative_prompt'),
+            '|width|': str(params.get('width')),
+            '|height|': str(params.get('height')),
+            '|num_frames|': str(params.get('num_frames')),
+            '|steps|': str(params.get('num_inference_steps')),
+            '|fps|': str(params.get('fps')),
+            '|guidance_scale|': str(params.get('guidance_scale')),
+            '|flow_shift|': str(params.get('flow_shift'))
         }
 
         for placeholder, value in replacements.items():
@@ -142,6 +144,8 @@ def handler(job):
         num_frames = validate_frame_count(job_input.get("num_frames", 17))
         fps = job_input.get("fps", 12)
         num_inference_steps = job_input.get("num_inference_steps", 30)
+        guidance_scale = job_input.get("guidance_scale", 6)
+        flow_shift = job_input.get("flow_shift", 9)
 
         # Validate parameters
         if width % 8 != 0 or height % 8 != 0:
@@ -162,7 +166,9 @@ def handler(job):
             "height": height,
             "num_frames": num_frames,
             "fps": fps,
-            "num_inference_steps": num_inference_steps
+            "num_inference_steps": num_inference_steps,
+            "guidance_scale": guidance_scale,
+            "flow_shift": flow_shift
         })
 
         # Queue workflow
