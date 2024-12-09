@@ -110,20 +110,31 @@ RUN if [ "$USE_SMALL_MODEL" = "true" ] ; then \
     https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_vae_fp32.safetensors; \
     fi
 
-# Copy appropriate workflow based on selections
-RUN if [ "$USE_SMALL_MODEL" = "true" ] && [ "$USE_BLOCK_SWAPPING" = "true" ]; then \
-    cp /comfyui/workflows/small_model_block_swapping.json /comfyui/workflows/workflow.json; \
-    elif [ "$USE_SMALL_MODEL" = "true" ] && [ "$USE_BLOCK_SWAPPING" = "false" ]; then \
-    cp /comfyui/workflows/small_model_no_block_swapping.json /comfyui/workflows/workflow.json; \
-    elif [ "$USE_SMALL_MODEL" = "false" ] && [ "$USE_BLOCK_SWAPPING" = "true" ]; then \
-    cp /comfyui/workflows/large_model_block_swapping.json /comfyui/workflows/workflow.json; \
+# Download HunyuanVideo models based on selection
+RUN if [ "$USE_SMALL_MODEL" = "true" ] ; then \
+    wget -O models/diffusion_models/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors \
+    https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors && \
+    wget -O models/vae/hunyuan_video_vae_bf16.safetensors \
+    https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_vae_bf16.safetensors && \
+    if [ "$USE_BLOCK_SWAPPING" = "true" ]; then \
+        COPY workflows/small_model_block_swapping.json /comfyui/workflows/workflow.json; \
     else \
-    cp /comfyui/workflows/large_model_no_block_swapping.json /comfyui/workflows/workflow.json; \
+        COPY workflows/small_model_no_block_swapping.json /comfyui/workflows/workflow.json; \
+    fi; \
+    else \
+    wget -O models/diffusion_models/hunyuan_video_720_cfgdistill_bf16.safetensors \
+    https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_cfgdistill_bf16.safetensors && \
+    wget -O models/vae/hunyuan_video_vae_fp32.safetensors \
+    https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_vae_fp32.safetensors && \
+    if [ "$USE_BLOCK_SWAPPING" = "true" ]; then \
+        COPY workflows/large_model_block_swapping.json /comfyui/workflows/workflow.json; \
+    else \
+        COPY workflows/large_model_no_block_swapping.json /comfyui/workflows/workflow.json; \
+    fi; \
     fi
 
 # Copy application files
-COPY handler.py start.sh /
-COPY workflows/${USE_SMALL_MODEL:+small}${USE_SMALL_MODEL:-large}_model_${USE_BLOCK_SWAPPING:+block_swapping}${USE_BLOCK_SWAPPING:-no_block_swapping}.json /comfyui/workflows/workflow.json
+COPY handler.py start.sh
 
 # Make start script executable
 RUN chmod +x /start.sh
