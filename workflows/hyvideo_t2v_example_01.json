@@ -7,7 +7,6 @@
       "quantization": "fp8_e4m3fn",
       "load_device": "offload_device",
       "attention_mode": "sageattn_varlen"
-
     }
   },
   "3": {
