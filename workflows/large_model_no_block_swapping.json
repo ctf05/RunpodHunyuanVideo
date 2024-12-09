@@ -2,9 +2,9 @@
   "1": {
     "class_type": "HyVideoModelLoader",
     "inputs": {
-      "model": "hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors",
+      "model": "hunyuan_video_720_cfgdistill_bf16.safetensors",
       "base_precision": "bf16",
-      "quantization": "fp8_e4m3fn",
+      "quantization": "disabled",
       "load_device": "main_device",
       "attention_mode": "sageattn_varlen"
     }
@@ -23,15 +23,14 @@
       "force_offload": true,
       "denoise_strength": 1,
       "hyvid_embeds": ["30", 0],
-      "embedded_guidance_scale": 1,
       "model": ["1", 0]
     }
   },
   "7": {
     "class_type": "HyVideoVAELoader",
     "inputs": {
-      "model_name": "hunyuan_video_vae_bf16.safetensors",
-      "precision": "fp16"
+      "model_name": "hunyuan_video_vae_fp32.safetensors",
+      "precision": "fp32"
     }
   },
   "16": {

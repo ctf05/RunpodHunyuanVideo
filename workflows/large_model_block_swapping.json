@@ -1,0 +1,90 @@
+{
+  "35": {
+    "class_type": "HyVideoBlockSwap",
+    "inputs": {
+      "block_num": 20,
+      "device": 0,
+      "double_blocks_to_swap": 20,
+      "single_blocks_to_swap": 20,
+      "offload_img_in": true,
+      "offload_txt_in": true
+    }
+  },
+  "1": {
+    "class_type": "HyVideoModelLoader",
+    "inputs": {
+      "model": "hunyuan_video_720_cfgdistill_bf16.safetensors",
+      "base_precision": "bf16",
+      "quantization": "disabled",
+      "load_device": "main_device",
+      "attention_mode": "sageattn_varlen",
+      "block_swap_args": ["35", 0]
+    }
+  },
+  "3": {
+    "class_type": "HyVideoSampler",
+    "inputs": {
+      "width": |width|,
+      "height": |height|,
+      "num_frames": |num_frames|,
+      "steps": |steps|,
+      "guidance_scale": |guidance_scale|,
+      "flow_shift": |flow_shift|,
+      "seed": 3,
+      "control_after_generate": "fixed",
+      "force_offload": true,
+      "denoise_strength": 1,
+      "hyvid_embeds": ["30", 0],
+      "model": ["1", 0]
+    }
+  },
+  "7": {
+    "class_type": "HyVideoVAELoader",
+    "inputs": {
+      "model_name": "hunyuan_video_vae_fp32.safetensors",
+      "precision": "fp32"
+    }
+  },
+  "16": {
+    "class_type": "DownloadAndLoadHyVideoTextEncoder",
+    "inputs": {
+      "llm_model": "Kijai/llava-llama-3-8b-text-encoder-tokenizer",
+      "clip_model": "openai/clip-vit-large-patch14",
+      "precision": "fp16",
+      "quantization": "bnb_nf4"
+    }
+  },
+  "30": {
+    "class_type": "HyVideoTextEncode",
+    "inputs": {
+      "prompt": "|prompt|",
+      "negative": "|negative_prompt|",
+      "force_offload": true,
+      "text_encoders": ["16", 0]
+    }
+  },
+  "34": {
+    "class_type": "VHS_VideoCombine",
+    "inputs": {
+      "images": ["5", 0],
+      "frame_rate": |fps|,
+      "loop_count": 0,
+      "filename_prefix": "HunyuanVideo",
+      "format": "video/h264-mp4",
+      "pix_fmt": "yuv420p",
+      "crf": 19,
+      "save_metadata": false,
+      "pingpong": false,
+      "save_output": true
+    }
+  },
+  "5": {
+    "class_type": "HyVideoDecode",
+    "inputs": {
+      "vae": ["7", 0],
+      "samples": ["3", 0],
+      "enable_vae_tiling": true,
+      "temporal_tiling_sample_size": 16
+    }
+  }
+}

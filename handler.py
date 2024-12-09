@@ -17,7 +17,7 @@ REFRESH_WORKER = os.environ.get("REFRESH_WORKER", "false").lower() == "true"
 
 class HunyuanGenerator:
     def __init__(self):
-        self.workflow_path = '/comfyui/workflows/hyvideo_t2v_example_01.json'
+        self.workflow_path = '/comfyui/workflows/workflow.json'
         self.load_default_workflow()
 
     def load_default_workflow(self):

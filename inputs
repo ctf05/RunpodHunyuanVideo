@@ -1,0 +1,10 @@
+{
+  "input": {
+    "prompt": "the ultra-wide-angle lens follows closely from the hood, with raindrops continuously splattering against the lens. Ahead, a sports car speeds around a corner, its tires violently skidding against the wet road, creating a mist of water. Neon lights refract in the rain, leaving colorful streaks on the car’s surface. The camera swiftly shifts to the side of the car, capturing the wheels spinning at high speed, before finally moving to the rear",
+    "num_frames": 72,
+    "width": 800,
+    "height": 448,
+    "flow_shift": 20,
+    "num_inference_steps": 30
+  }
+}
