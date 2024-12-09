@@ -53,8 +53,10 @@ def wait_for_comfyui_ready():
         try:
             # Test prompt endpoint with empty prompt
             data = json.dumps({"prompt": {}}).encode("utf-8")
+            print("checking comfyui")
             req = urllib.request.Request(f"http://{COMFY_HOST}/prompt", data=data)
             response = urllib.request.urlopen(req)
+            print(response)
             print(f"ComfyUI response: {response.read().decode('utf-8')}")
             print(f"ComfyUI response code: {response.getcode()}")
 
