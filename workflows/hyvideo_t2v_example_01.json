@@ -16,8 +16,8 @@
       "model": "hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors",
       "base_precision": "bf16",
       "quantization": "fp8_e4m3fn",
-      "load_device": "main_device",
-      "attention_mode": "sdpa",
+      "load_device": "offload_device",
+      "attention_mode": "sageattn_varlen",
       "block_swap_args": ["35", 0]
 
     }
