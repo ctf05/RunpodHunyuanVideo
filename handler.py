@@ -56,7 +56,8 @@ def wait_for_comfyui_ready():
             req = urllib.request.Request(f"http://{COMFY_HOST}/prompt", data=data)
             response = urllib.request.urlopen(req)
 
-            if response.status == 200:
+            response_data = json.loads(response.read().decode('utf-8'))
+            if isinstance(response_data, dict) and response_data.get('type') == 'prompt_no_outputs':
                 print(f"ComfyUI ready after {i+1} attempts")
                 return True
         except Exception as e:
