@@ -1,11 +1,4 @@
 {
-  "35": {
-    "class_type": "HyVideoBlockSwap",
-    "inputs": {
-      "block_num": 20,
-      "device": 0
-    }
-  },
   "1": {
     "class_type": "HyVideoModelLoader",
     "inputs": {
@@ -13,8 +6,7 @@
       "base_precision": "bf16",
       "quantization": "fp8_e4m3fn",
       "load_device": "main_device",
-      "attention_mode": "sdpa",
-      "block_swap_args": ["35", 0]
+      "attention_mode": "sdpa"
 
     }
   },
