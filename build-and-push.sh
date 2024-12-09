@@ -7,7 +7,7 @@ echo "Starting Docker build process..."
 docker build -t ctf05/runpodhunyuanvideo:latest .
 
 echo "Docker build completed. Starting push to registry..."
-docker push ctf05/runpodhunyuanvideo:latest
+docker push --compression-level=9 ctf05/runpodhunyuanvideo:latest
 
 echo "Process completed successfully!"
 echo
