@@ -3,7 +3,11 @@
     "class_type": "HyVideoBlockSwap",
     "inputs": {
       "block_num": 20,
-      "device": 0
+      "device": 0,
+      "double_blocks_to_swap": 20,
+      "single_blocks_to_swap": 20,
+      "offload_img_in": true,
+      "offload_txt_in": true
     }
   },
   "1": {
