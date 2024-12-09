@@ -83,9 +83,7 @@ RUN cd models/LLM/llava-llama-3-8b-text-encoder-tokenizer && \
     wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/tokenizer.json && \
     wget https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer/resolve/main/tokenizer_config.json
 
-# Add model selection arguments
 ARG USE_SMALL_MODEL=false
-ARG USE_BLOCK_SWAPPING=true
 
 # Download HunyuanVideo models based on selection
 RUN if [ "$USE_SMALL_MODEL" = "true" ] ; then \
@@ -108,6 +106,8 @@ RUN cd /comfyui/custom_nodes/video_helper_suite && pip install --no-cache-dir -r
 # Copy application files
 COPY handler.py start.sh /
 COPY workflows/*.json /comfyui/workflows/
+
+ARG USE_BLOCK_SWAPPING=true
 
 # Select appropriate workflow
 RUN if [ "$USE_SMALL_MODEL" = "true" ] && [ "$USE_BLOCK_SWAPPING" = "true" ]; then \
