@@ -32,7 +32,6 @@ class HunyuanGenerator:
         # Replace all placeholders
         replacements = {
             '|prompt|': params.get('prompt'),
-            '|negative_prompt|': params.get('negative_prompt'),
             '|width|': str(params.get('width')),
             '|height|': str(params.get('height')),
             '|num_frames|': str(params.get('num_frames')),
@@ -138,14 +137,13 @@ def handler(job):
 
         # Extract parameters
         prompt = job_input.get("prompt", "high quality nature video of a red panda balancing on a bamboo stick while a bird lands on the panda's head, there's a waterfall in the background")
-        negative_prompt = job_input.get("negative_prompt", "bad quality video")
         width = job_input.get("width", 512)
         height = job_input.get("height", 288)
         num_frames = validate_frame_count(job_input.get("num_frames", 17))
-        fps = job_input.get("fps", 12)
-        num_inference_steps = job_input.get("num_inference_steps", 30)
+        fps = job_input.get("fps", 16)
+        num_inference_steps = job_input.get("num_inference_steps", 25)
         guidance_scale = job_input.get("guidance_scale", 6)
-        flow_shift = job_input.get("flow_shift", 9)
+        flow_shift = job_input.get("flow_shift", 6)
 
         # Validate parameters
         if width % 8 != 0 or height % 8 != 0:

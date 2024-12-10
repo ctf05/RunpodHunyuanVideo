@@ -1,78 +1,184 @@
 {
   "1": {
-    "class_type": "HyVideoModelLoader",
     "inputs": {
-      "model": "hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors",
+      "model": "hunyuan_video_720_fp8_e4m3fn.safetensors",
       "base_precision": "bf16",
       "quantization": "fp8_e4m3fn",
-      "load_device": "main_device",
+      "load_device": "offload_device",
       "attention_mode": "sageattn_varlen"
+    },
+    "class_type": "HyVideoModelLoader",
+    "_meta": {
+      "title": "HunyuanVideo Model Loader"
     }
   },
   "3": {
-    "class_type": "HyVideoSampler",
     "inputs": {
       "width": |width|,
       "height": |height|,
       "num_frames": |num_frames|,
-      "steps": |steps|,
-      "guidance_scale": |guidance_scale|,
+      "steps": |num_inference_steps|,
+      "embedded_guidance_scale": |guidance_scale|,
       "flow_shift": |flow_shift|,
       "seed": 3,
-      "control_after_generate": "fixed",
-      "force_offload": true,
+      "force_offload": 1,
       "denoise_strength": 1,
-      "hyvid_embeds": ["30", 0],
-      "model": ["1", 0]
+      "model": [
+        "1",
+        0
+      ],
+      "hyvid_embeds": [
+        "30",
+        0
+      ]
+    },
+    "class_type": "HyVideoSampler",
+    "_meta": {
+      "title": "HunyuanVideo Sampler"
+    }
+  },
+  "5": {
+    "inputs": {
+      "enable_vae_tiling": true,
+      "temporal_tiling_sample_size": 64,
+      "spatial_tile_sample_min_size": 256,
+      "auto_tile_size": true,
+      "vae": [
+        "7",
+        0
+      ],
+      "samples": [
+        "3",
+        0
+      ]
+    },
+    "class_type": "HyVideoDecode",
+    "_meta": {
+      "title": "HunyuanVideo Decode"
     }
   },
   "7": {
-    "class_type": "HyVideoVAELoader",
     "inputs": {
       "model_name": "hunyuan_video_vae_bf16.safetensors",
-      "precision": "fp16"
+      "precision": "bf16"
+    },
+    "class_type": "HyVideoVAELoader",
+    "_meta": {
+      "title": "HunyuanVideo VAE Loader"
     }
   },
   "16": {
-    "class_type": "DownloadAndLoadHyVideoTextEncoder",
     "inputs": {
       "llm_model": "Kijai/llava-llama-3-8b-text-encoder-tokenizer",
       "clip_model": "openai/clip-vit-large-patch14",
       "precision": "fp16",
-      "quantization": "bnb_nf4"
+      "apply_final_norm": false,
+      "hidden_state_skip_layer": 2,
+      "quantization": "disabled"
+    },
+    "class_type": "DownloadAndLoadHyVideoTextEncoder",
+    "_meta": {
+      "title": "(Down)Load HunyuanVideo TextEncoder"
     }
   },
   "30": {
-    "class_type": "HyVideoTextEncode",
     "inputs": {
       "prompt": "|prompt|",
-      "negative": "|negative_prompt|",
       "force_offload": true,
-      "text_encoders": ["16", 0]
+      "prompt_template": "video",
+      "text_encoders": [
+        "16",
+        0
+      ]
+    },
+    "class_type": "HyVideoTextEncode",
+    "_meta": {
+      "title": "HunyuanVideo TextEncode"
     }
   },
   "34": {
-    "class_type": "VHS_VideoCombine",
     "inputs": {
-      "images": ["5", 0],
       "frame_rate": |fps|,
       "loop_count": 0,
       "filename_prefix": "HunyuanVideo",
       "format": "video/h264-mp4",
       "pix_fmt": "yuv420p",
-      "crf": 19,
+      "crf": 36,
       "save_metadata": false,
       "pingpong": false,
-      "save_output": true
+      "save_output": false,
+      "images": [
+        "49",
+        0
+      ]
+    },
+    "class_type": "VHS_VideoCombine",
+    "_meta": {
+      "title": "Video Combine 🎥🅥🅗🅢"
     }
   },
-  "5": {
-    "class_type": "HyVideoDecode",
+  "42": {
     "inputs": {
-      "vae": ["7", 0],
-      "samples": ["3", 0],
-      "enable_vae_tiling": true,
-      "temporal_tiling_sample_size": 16
+      "model_name": "RealESRGAN_x4.pth"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": {
+      "title": "Load Upscale Model"
+    }
+  },
+  "43": {
+    "inputs": {
+      "upscale_model": [
+        "42",
+        0
+      ],
+      "image": [
+        "50",
+        0
+      ]
+    },
+    "class_type": "ImageUpscaleWithModel",
+    "_meta": {
+      "title": "Upscale Image (using Model)"
+    }
+  },
+  "49": {
+    "inputs": {
+      "mode": "rescale",
+      "supersample": "false",
+      "resampling": "bicubic",
+      "rescale_factor": 2,
+      "resize_width": 1524,
+      "resize_height": 1024,
+      "image": [
+        "43",
+        0
+      ]
+    },
+    "class_type": "Image Resize",
+    "_meta": {
+      "title": "Image Resize"
+    }
+  },
+  "50": {
+    "inputs": {
+      "iterations": 2,
+      "kernel_size": 3,
+      "images": [
+        "5",
+        0
+      ]
+    },
+    "class_type": "Image Lucy Sharpen",
+    "_meta": {
+      "title": "Image Lucy Sharpen"
+    }
+  },
+  "51": {
+    "inputs": {},
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
     }
   }
 }
