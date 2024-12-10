@@ -14,6 +14,23 @@ COMFY_POLLING_INTERVAL_MS = 250
 COMFY_POLLING_MAX_RETRIES = 50000
 COMFY_HOST = "127.0.0.1:8188"
 REFRESH_WORKER = os.environ.get("REFRESH_WORKER", "false").lower() == "true"
+MIN_GENERATION_PIXELS = 512 * 320
+MAX_GENERATION_TOTAL = 500 * 500 * 100
+
+def calculate_generation_dimensions(target_width: int, target_height: int) -> Tuple[int, int]:
+    target_ratio = target_width / target_height
+    width = 8
+    height = 8
+
+    while width * height < MIN_GENERATION_PIXELS:
+        current_ratio = width / height
+
+        if current_ratio < target_ratio:
+            width += 8
+        else:
+            height += 8
+
+    return width, height
 
 class HunyuanGenerator:
     def __init__(self):
@@ -137,19 +154,24 @@ def handler(job):
 
         # Extract parameters
         prompt = job_input.get("prompt", "high quality nature video of a red panda balancing on a bamboo stick while a bird lands on the panda's head, there's a waterfall in the background")
-        width = job_input.get("width", 512)
-        height = job_input.get("height", 288)
+        target_width = job_input.get("target_width", 512)
+        target_height = job_input.get("target_height", 288)
+
+        # Calculate optimal generation dimensions
+        try:
+            width, height = calculate_generation_dimensions(target_width, target_height)
+        except ValueError as e:
+            return {"error": str(e)}
+
         num_frames = validate_frame_count(job_input.get("num_frames", 17))
         fps = job_input.get("fps", 16)
         num_inference_steps = job_input.get("num_inference_steps", 25)
         guidance_scale = job_input.get("guidance_scale", 6)
         flow_shift = job_input.get("flow_shift", 6)
 
-        # Validate parameters
-        if width % 8 != 0 or height % 8 != 0:
-            return {"error": "Width and height must be divisible by 8"}
-        if width * height > 1024 * 592 * 72:
-            return {"error": "Resolution * num_frames too high"}
+        # Validate total size
+        if width * height * num_frames > MAX_GENERATION_TOTAL:
+            return {"error": "Width * height * num_frames exceeds maximum allowed"}
 
         # Check if ComfyUI is available
         if not check_server(f"http://{COMFY_HOST}"):
@@ -162,7 +184,6 @@ def handler(job):
         generator = HunyuanGenerator()
         workflow = generator.update_workflow({
             "prompt": prompt,
-            "negative_prompt": negative_prompt,
             "width": width,
             "height": height,
             "num_frames": num_frames,
