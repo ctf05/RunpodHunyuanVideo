@@ -57,7 +57,7 @@ RUN mkdir -p \
     models/vae \
     models/clip/clip-vit-large-patch14 \
     models/LLM/llava-llama-3-8b-text-encoder-tokenizer \
-    models/upscale_models
+    models/upscale_models \
     workflows \
     output
 
