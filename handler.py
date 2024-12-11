@@ -17,7 +17,7 @@ REFRESH_WORKER = os.environ.get("REFRESH_WORKER", "false").lower() == "true"
 MIN_GENERATION_PIXELS = 512 * 320
 MAX_GENERATION_TOTAL = 500 * 500 * 100
 
-def calculate_generation_dimensions(target_width: int, target_height: int) -> Tuple[int, int]:
+def calculate_generation_dimensions(target_width, target_height):
     target_ratio = target_width / target_height
     width = 8
     height = 8
