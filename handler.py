@@ -168,6 +168,7 @@ def handler(job):
         num_inference_steps = job_input.get("num_inference_steps", 25)
         guidance_scale = job_input.get("guidance_scale", 6)
         flow_shift = job_input.get("flow_shift", 6)
+        video_index = job_input.get("video_index")
 
         # Validate total size
         if width * height * num_frames > MAX_GENERATION_TOTAL:
@@ -176,6 +177,10 @@ def handler(job):
         # Check if ComfyUI is available
         if not check_server(f"http://{COMFY_HOST}"):
             return {"error": "ComfyUI server not available"}
+
+        # Check if video index is valid
+        if video_index is None or video_index < 0:
+            return {"error": "Invalid video index"}
 
         # Clear history
         requests.post(f"http://{COMFY_HOST}/history", json={"clear": True})
@@ -211,11 +216,13 @@ def handler(job):
                 # Process output video
                 result = process_output_video(history[prompt_id]["outputs"], job["id"])
                 if result["status"] == "success":
-                    return {
-                        "base64_video": result["video"],
-                        "base64_preview": result["workflow_preview"],
-                        "refresh_worker": REFRESH_WORKER
-                    }
+                    if video_index == 0:
+                        return {
+                            "base64_video": result["video"],
+                            "base64_preview": result["workflow_preview"]
+                        }
+                    else:
+                        return {"base64_video": result["video"]}
                 else:
                     return {"error": result["message"]}
 
