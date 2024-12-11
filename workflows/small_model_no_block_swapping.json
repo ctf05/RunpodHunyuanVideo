@@ -74,7 +74,7 @@
       "precision": "fp16",
       "apply_final_norm": false,
       "hidden_state_skip_layer": 2,
-      "quantization": "disabled"
+      "quantization": "bnb_nf4"
     },
     "class_type": "DownloadAndLoadHyVideoTextEncoder",
     "_meta": {
