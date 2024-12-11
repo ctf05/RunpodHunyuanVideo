@@ -106,7 +106,7 @@
       "crf": 36,
       "save_metadata": false,
       "pingpong": false,
-      "save_output": false,
+      "save_output": true,
       "images": [
         "49",
         0
