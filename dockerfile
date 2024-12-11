@@ -48,7 +48,7 @@ RUN set +o pipefail && /usr/bin/yes | comfy --workspace /comfyui install --cuda-
 # Change to ComfyUI directory and install custom nodes
 WORKDIR /comfyui
 RUN git clone https://github.com/kijai/ComfyUI-HunyuanVideoWrapper.git custom_nodes/hunyuan_wrapper && \
-    git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git custom_nodes/video_helper_suite \
+    git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git custom_nodes/video_helper_suite && \
     git clone https://github.com/WASasquatch/was-node-suite-comfyui/ custom_nodes/was_node_suite-comfyui
 
 # Create necessary directories
