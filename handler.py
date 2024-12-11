@@ -180,9 +180,13 @@ def handler(job):
         if not check_server(f"http://{COMFY_HOST}"):
             return {"error": "ComfyUI server not available"}
 
+        print("1")
+
         # Check if video index is valid
         if video_index is None or video_index < 0:
             return {"error": "Invalid video index"}
+
+        print("2")
 
         # Clear history
         requests.post(f"http://{COMFY_HOST}/history", json={"clear": True})
