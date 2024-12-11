@@ -170,7 +170,7 @@ def handler(job):
         num_inference_steps = job_input.get("num_inference_steps", 25)
         guidance_scale = job_input.get("guidance_scale", 6)
         flow_shift = job_input.get("flow_shift", 6)
-        video_index = job_input.get("video_index")
+        video_index = job_input.get("video_index", None)
 
         # Validate total size
         if base_width * base_height * num_frames > MAX_GENERATION_TOTAL:
@@ -180,18 +180,8 @@ def handler(job):
         if not check_server(f"http://{COMFY_HOST}"):
             return {"error": "ComfyUI server not available"}
 
-        print("1")
-
-        # Check if video index is valid
-        if video_index is None or video_index < 0:
-            return {"error": "Invalid video index"}
-
-        print("2")
-
         # Clear history
         requests.post(f"http://{COMFY_HOST}/history", json={"clear": True})
-
-        print("runpod-worker-comfy - history cleared")
 
         # Prepare and update workflow
         generator = HunyuanGenerator()
