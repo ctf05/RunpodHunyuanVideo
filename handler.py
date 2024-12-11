@@ -180,12 +180,8 @@ def handler(job):
         if not check_server(f"http://{COMFY_HOST}"):
             return {"error": "ComfyUI server not available"}
 
-        print("1")
-
         # Clear history
         requests.post(f"http://{COMFY_HOST}/history", json={"clear": True})
-
-        print("2")
 
         # Prepare and update workflow
         generator = HunyuanGenerator()
@@ -201,8 +197,6 @@ def handler(job):
             "guidance_scale": guidance_scale,
             "flow_shift": flow_shift
         })
-
-        print("3")
 
         # Queue workflow
         try:
