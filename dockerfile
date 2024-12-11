@@ -93,10 +93,10 @@ ARG USE_SMALL_MODEL=true
 
 # Download HunyuanVideo models based on selection
 RUN if [ "$USE_SMALL_MODEL" = "true" ] ; then \
-    wget -O models/diffusion_models/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_fp8_e4m3fn.safetensors && \
+    wget -O models/diffusion_models/hunyuan_video_720_fp8_e4m3fn.safetensors https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors && \
     wget -O models/vae/hunyuan_video_vae_bf16.safetensors https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_vae_bf16.safetensors; \
     else \
-    wget -O models/diffusion_models/hunyuan_video_720_cfgdistill_bf16.safetensors https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_bf16.safetensors && \
+    wget -O models/diffusion_models/hunyuan_video_720_bf16.safetensors https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_cfgdistill_bf16.safetensors && \
     wget -O models/vae/hunyuan_video_vae_fp32.safetensors https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_vae_fp32.safetensors; \
     fi
 
