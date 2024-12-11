@@ -48,13 +48,13 @@ class HunyuanGenerator:
 
         # Replace all placeholders
         replacements = {
-            '|prompt|': params.get('prompt'),
+            '|prompt|': str(params.get('prompt')),
             '|base_width|': str(params.get('base_width')),
             '|base_height|': str(params.get('base_height')),
             '|target_width|': str(params.get('target_width')),
             '|target_height|': str(params.get('target_height')),
             '|num_frames|': str(params.get('num_frames')),
-            '|steps|': str(params.get('num_inference_steps')),
+            '|num_inference_steps|': str(params.get('num_inference_steps')),
             '|fps|': str(params.get('fps')),
             '|guidance_scale|': str(params.get('guidance_scale')),
             '|flow_shift|': str(params.get('flow_shift'))
