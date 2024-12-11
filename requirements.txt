@@ -5,3 +5,4 @@ opencv-python
 imageio-ffmpeg
 sageattention
 bitsandbytes>=0.41.1
+Pillow
