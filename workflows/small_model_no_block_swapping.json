@@ -14,8 +14,8 @@
   },
   "3": {
     "inputs": {
-      "width": |width|,
-      "height": |height|,
+      "width": |base_width|,
+      "height": |base_height|,
       "num_frames": |num_frames|,
       "steps": |num_inference_steps|,
       "embedded_guidance_scale": |guidance_scale|,
@@ -148,8 +148,8 @@
       "supersample": "false",
       "resampling": "bicubic",
       "rescale_factor": 2,
-      "resize_width": 1524,
-      "resize_height": 1024,
+      "resize_width": |target_width|,
+      "resize_height": |target_height|,
       "image": [
         "43",
         0

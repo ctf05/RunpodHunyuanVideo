@@ -49,8 +49,10 @@ class HunyuanGenerator:
         # Replace all placeholders
         replacements = {
             '|prompt|': params.get('prompt'),
-            '|width|': str(params.get('width')),
-            '|height|': str(params.get('height')),
+            '|base_width|': str(params.get('base_width')),
+            '|base_height|': str(params.get('base_height')),
+            '|target_width|': str(params.get('target_width')),
+            '|target_height|': str(params.get('target_height')),
             '|num_frames|': str(params.get('num_frames')),
             '|steps|': str(params.get('num_inference_steps')),
             '|fps|': str(params.get('fps')),
@@ -159,7 +161,7 @@ def handler(job):
 
         # Calculate optimal generation dimensions
         try:
-            width, height = calculate_generation_dimensions(target_width, target_height)
+            base_width, base_height = calculate_generation_dimensions(target_width, target_height)
         except ValueError as e:
             return {"error": str(e)}
 
@@ -171,7 +173,7 @@ def handler(job):
         video_index = job_input.get("video_index")
 
         # Validate total size
-        if width * height * num_frames > MAX_GENERATION_TOTAL:
+        if base_width * base_height * num_frames > MAX_GENERATION_TOTAL:
             return {"error": "Width * height * num_frames exceeds maximum allowed"}
 
         # Check if ComfyUI is available
@@ -189,8 +191,10 @@ def handler(job):
         generator = HunyuanGenerator()
         workflow = generator.update_workflow({
             "prompt": prompt,
-            "width": width,
-            "height": height,
+            "base_width": base_width,
+            "base_height": base_height,
+            "target_width": target_width,
+            "target_height": target_height,
             "num_frames": num_frames,
             "fps": fps,
             "num_inference_steps": num_inference_steps,
