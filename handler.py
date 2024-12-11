@@ -187,6 +187,8 @@ def handler(job):
         # Clear history
         requests.post(f"http://{COMFY_HOST}/history", json={"clear": True})
 
+        print("runpod-worker-comfy - history cleared")
+
         # Prepare and update workflow
         generator = HunyuanGenerator()
         workflow = generator.update_workflow({
