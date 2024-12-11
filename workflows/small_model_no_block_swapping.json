@@ -103,7 +103,7 @@
       "filename_prefix": "HunyuanVideo",
       "format": "video/h264-mp4",
       "pix_fmt": "yuv420p",
-      "crf": 38,
+      "crf": 36,
       "save_metadata": false,
       "pingpong": false,
       "save_output": true,
