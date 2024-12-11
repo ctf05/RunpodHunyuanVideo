@@ -171,6 +171,7 @@ def handler(job):
 
         # Validate total size
         if width * height * num_frames > MAX_GENERATION_TOTAL:
+            print(f"runpod-worker-comfy - Total size exceeds maximum allowed: {width}x{height}x{num_frames}")
             return {"error": "Width * height * num_frames exceeds maximum allowed"}
 
         # Check if ComfyUI is available
