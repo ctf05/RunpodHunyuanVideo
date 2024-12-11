@@ -17,7 +17,7 @@ REFRESH_WORKER = os.environ.get("REFRESH_WORKER", "false").lower() == "true"
 MIN_GENERATION_PIXELS = 512 * 320
 MAX_GENERATION_TOTAL = 500 * 500 * 100
 
-def calculate_generation_dimensions(target_width: int, target_height: int) -> Tuple[int, int]:
+def calculate_generation_dimensions(target_width, target_height):
     target_ratio = target_width / target_height
     width = 8
     height = 8
@@ -48,11 +48,13 @@ class HunyuanGenerator:
 
         # Replace all placeholders
         replacements = {
-            '|prompt|': params.get('prompt'),
-            '|width|': str(params.get('width')),
-            '|height|': str(params.get('height')),
+            '|prompt|': str(params.get('prompt')),
+            '|base_width|': str(params.get('base_width')),
+            '|base_height|': str(params.get('base_height')),
+            '|target_width|': str(params.get('target_width')),
+            '|target_height|': str(params.get('target_height')),
             '|num_frames|': str(params.get('num_frames')),
-            '|steps|': str(params.get('num_inference_steps')),
+            '|num_inference_steps|': str(params.get('num_inference_steps')),
             '|fps|': str(params.get('fps')),
             '|guidance_scale|': str(params.get('guidance_scale')),
             '|flow_shift|': str(params.get('flow_shift'))
@@ -159,7 +161,7 @@ def handler(job):
 
         # Calculate optimal generation dimensions
         try:
-            width, height = calculate_generation_dimensions(target_width, target_height)
+            base_width, base_height = calculate_generation_dimensions(target_width, target_height)
         except ValueError as e:
             return {"error": str(e)}
 
@@ -168,10 +170,11 @@ def handler(job):
         num_inference_steps = job_input.get("num_inference_steps", 25)
         guidance_scale = job_input.get("guidance_scale", 6)
         flow_shift = job_input.get("flow_shift", 6)
+        video_index = job_input.get("video_index", None)
 
         # Validate total size
-        if width * height * num_frames > MAX_GENERATION_TOTAL:
-            print(f"runpod-worker-comfy - Total size exceeds maximum allowed: {width}x{height}x{num_frames}")
+        if base_width * base_height * num_frames > MAX_GENERATION_TOTAL:
+            print(f"runpod-worker-comfy - Total size exceeds maximum allowed: {base_width}x{base_height}x{num_frames}")
             return {"error": "Width * height * num_frames exceeds maximum allowed"}
 
         # Check if ComfyUI is available
@@ -185,8 +188,10 @@ def handler(job):
         generator = HunyuanGenerator()
         workflow = generator.update_workflow({
             "prompt": prompt,
-            "width": width,
-            "height": height,
+            "base_width": base_width,
+            "base_height": base_height,
+            "target_width": target_width,
+            "target_height": target_height,
             "num_frames": num_frames,
             "fps": fps,
             "num_inference_steps": num_inference_steps,
@@ -212,11 +217,13 @@ def handler(job):
                 # Process output video
                 result = process_output_video(history[prompt_id]["outputs"], job["id"])
                 if result["status"] == "success":
-                    return {
-                        "base64_video": result["video"],
-                        "base64_preview": result["workflow_preview"],
-                        "refresh_worker": REFRESH_WORKER
-                    }
+                    if video_index == 0:
+                        return {
+                            "base64_video": result["video"],
+                            "base64_preview": result["workflow_preview"]
+                        }
+                    else:
+                        return {"base64_video": result["video"]}
                 else:
                     return {"error": result["message"]}
 

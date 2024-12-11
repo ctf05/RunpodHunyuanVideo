@@ -14,8 +14,8 @@
   },
   "3": {
     "inputs": {
-      "width": |width|,
-      "height": |height|,
+      "width": |base_width|,
+      "height": |base_height|,
       "num_frames": |num_frames|,
       "steps": |num_inference_steps|,
       "embedded_guidance_scale": |guidance_scale|,
@@ -74,7 +74,7 @@
       "precision": "fp16",
       "apply_final_norm": false,
       "hidden_state_skip_layer": 2,
-      "quantization": "disabled"
+      "quantization": "bnb_nf4"
     },
     "class_type": "DownloadAndLoadHyVideoTextEncoder",
     "_meta": {
@@ -106,7 +106,7 @@
       "crf": 36,
       "save_metadata": false,
       "pingpong": false,
-      "save_output": false,
+      "save_output": true,
       "images": [
         "49",
         0
@@ -148,8 +148,8 @@
       "supersample": "false",
       "resampling": "bicubic",
       "rescale_factor": 2,
-      "resize_width": 1524,
-      "resize_height": 1024,
+      "resize_width": |target_width|,
+      "resize_height": |target_height|,
       "image": [
         "43",
         0
@@ -172,13 +172,6 @@
     "class_type": "Image Lucy Sharpen",
     "_meta": {
       "title": "Image Lucy Sharpen"
-    }
-  },
-  "51": {
-    "inputs": {},
-    "class_type": "PreviewImage",
-    "_meta": {
-      "title": "Preview Image"
     }
   }
 }
