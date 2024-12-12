@@ -106,7 +106,7 @@ def get_history(prompt_id):
     with urllib.request.urlopen(f"http://{COMFY_HOST}/history/{prompt_id}") as response:
         return json.loads(response.read())
 
-def process_output_video(outputs, job_id, target_width, target_height):
+def process_output_video(outputs, job_id, target_width, target_height, video_index=None):
     """Process video outputs from ComfyUI"""
     # Find gif outputs which contain video and workflow preview
     video_info = None
@@ -135,7 +135,8 @@ def process_output_video(outputs, job_id, target_width, target_height):
             workflow_bytes = f.read()
 
         # Resize and compress the workflow preview
-        workflow_bytes = resize_and_compress_image(workflow_bytes, target_width, target_height)
+        if video_index == 0:
+            workflow_bytes = resize_and_compress_image(workflow_bytes, target_width, target_height)
 
         video_b64 = base64.b64encode(video_bytes).decode('utf-8')
         workflow_b64 = base64.b64encode(workflow_bytes).decode('utf-8')
@@ -233,7 +234,7 @@ def handler(job):
 
             if prompt_id in history and history[prompt_id].get("outputs"):
                 # Process output video with target dimensions
-                result = process_output_video(history[prompt_id]["outputs"], job["id"], target_width, target_height)
+                result = process_output_video(history[prompt_id]["outputs"], job["id"], target_width, target_height, video_index)
                 if result["status"] == "success":
                     if video_index == 0:
                         return {
