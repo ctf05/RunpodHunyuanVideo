@@ -144,7 +144,7 @@
   },
   "49": {
     "inputs": {
-      "mode": "rescale",
+      "mode": "resize",
       "supersample": "false",
       "resampling": "bicubic",
       "rescale_factor": 2,
