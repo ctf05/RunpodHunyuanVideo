@@ -6,6 +6,8 @@ import time
 import os
 import requests
 import base64
+from PIL import Image
+from io import BytesIO
 
 # Constants for ComfyUI interaction
 COMFY_API_AVAILABLE_INTERVAL_MS = 100
@@ -16,6 +18,19 @@ COMFY_HOST = "127.0.0.1:8188"
 REFRESH_WORKER = os.environ.get("REFRESH_WORKER", "false").lower() == "true"
 MIN_GENERATION_PIXELS = 512 * 320
 MAX_GENERATION_TOTAL = 500 * 500 * 100
+
+def resize_and_compress_image(image_bytes, target_width, target_height):
+    """Resize and compress the preview image"""
+    # Open the image from bytes
+    img = Image.open(BytesIO(image_bytes))
+
+    # Resize the image
+    img = img.resize((target_width, target_height), Image.Resampling.LANCZOS)
+
+    # Save the compressed image to bytes
+    output_buffer = BytesIO()
+    img.save(output_buffer, format='JPEG', quality=85, optimize=True)
+    return output_buffer.getvalue()
 
 def calculate_generation_dimensions(target_width, target_height):
     target_ratio = target_width / target_height
@@ -91,7 +106,7 @@ def get_history(prompt_id):
     with urllib.request.urlopen(f"http://{COMFY_HOST}/history/{prompt_id}") as response:
         return json.loads(response.read())
 
-def process_output_video(outputs, job_id):
+def process_output_video(outputs, job_id, target_width, target_height, video_index=None):
     """Process video outputs from ComfyUI"""
     # Find gif outputs which contain video and workflow preview
     video_info = None
@@ -118,6 +133,10 @@ def process_output_video(outputs, job_id):
             video_bytes = f.read()
         with open(workflow_path, 'rb') as f:
             workflow_bytes = f.read()
+
+        # Resize and compress the workflow preview
+        if video_index == 0:
+            workflow_bytes = resize_and_compress_image(workflow_bytes, target_width, target_height)
 
         video_b64 = base64.b64encode(video_bytes).decode('utf-8')
         workflow_b64 = base64.b64encode(workflow_bytes).decode('utf-8')
@@ -174,6 +193,7 @@ def handler(job):
 
         # Validate total size
         if base_width * base_height * num_frames > MAX_GENERATION_TOTAL:
+            print(f"runpod-worker-comfy - Total size exceeds maximum allowed: {base_width}x{base_height}x{num_frames}")
             return {"error": "Width * height * num_frames exceeds maximum allowed"}
 
         # Check if ComfyUI is available
@@ -213,8 +233,8 @@ def handler(job):
             history = get_history(prompt_id)
 
             if prompt_id in history and history[prompt_id].get("outputs"):
-                # Process output video
-                result = process_output_video(history[prompt_id]["outputs"], job["id"])
+                # Process output video with target dimensions
+                result = process_output_video(history[prompt_id]["outputs"], job["id"], target_width, target_height, video_index)
                 if result["status"] == "success":
                     if video_index == 0:
                         return {
