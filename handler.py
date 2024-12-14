@@ -178,6 +178,8 @@ def handler(job):
         target_width = job_input.get("target_width", 512)
         target_height = job_input.get("target_height", 288)
 
+        prompt = prompt + ". really fast motion"
+
         # Calculate optimal generation dimensions
         try:
             base_width, base_height = calculate_generation_dimensions(target_width, target_height)
