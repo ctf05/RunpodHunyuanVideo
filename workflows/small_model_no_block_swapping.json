@@ -108,7 +108,7 @@
       "pingpong": false,
       "save_output": true,
       "images": [
-        "49",
+        "52",
         0
       ]
     },
@@ -172,6 +172,24 @@
     "class_type": "Image Lucy Sharpen",
     "_meta": {
       "title": "Image Lucy Sharpen"
+    }
+  },
+  "52": {
+    "inputs": {
+      "ckpt_name": "rife49.pth",
+      "clear_cache_after_n_frames": 400,
+      "multiplier": 2,
+      "fast_mode": true,
+      "ensemble": true,
+      "scale_factor": 1,
+      "frames": [
+        "49",
+        0
+      ]
+    },
+    "class_type": "RIFE VFI",
+    "_meta": {
+      "title": "RIFE VFI (recommend rife47 and rife49)"
     }
   }
 }

@@ -47,9 +47,10 @@ RUN set +o pipefail && /usr/bin/yes | comfy --workspace /comfyui install --cuda-
 
 # Change to ComfyUI directory and install custom nodes
 WORKDIR /comfyui
-RUN git clone https://github.com/kijai/ComfyUI-HunyuanVideoWrapper.git custom_nodes/hunyuan_wrapper && \
-    git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git custom_nodes/video_helper_suite && \
-    git clone https://github.com/WASasquatch/was-node-suite-comfyui/ custom_nodes/was_node_suite-comfyui
+RUN git clone https://github.com/kijai/ComfyUI-HunyuanVideoWrapper.git custom_nodes/ComfyUI-HunyuanVideoWrapper && \
+    git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git custom_nodes/ComfyUI-VideoHelperSuite && \
+    git clone https://github.com/WASasquatch/was-node-suite-comfyui/ custom_nodes/was-node-suite-comfyui && \
+    git clone https://github.com/Fannovel16/ComfyUI-Frame-Interpolation/ custom_nodes/ComfyUI-Frame-Interpolation
 
 # Create necessary directories
 RUN mkdir -p \
@@ -106,9 +107,10 @@ WORKDIR /
 # Copy requirements and install Python dependencies
 COPY requirements.txt /
 RUN pip install --no-cache-dir -r requirements.txt
-RUN cd /comfyui/custom_nodes/hunyuan_wrapper && pip install --no-cache-dir -r requirements.txt
-RUN cd /comfyui/custom_nodes/video_helper_suite && pip install --no-cache-dir -r requirements.txt
-RUN cd /comfyui/custom_nodes/was_node_suite-comfyui && pip install --no-cache-dir -r requirements.txt
+RUN cd /comfyui/custom_nodes/ComfyUI-HunyuanVideoWrapper && pip install --no-cache-dir -r requirements.txt
+RUN cd /comfyui/custom_nodes/ComfyUI-VideoHelperSuite && pip install --no-cache-dir -r requirements.txt
+RUN cd /comfyui/custom_nodes/was-node-suite-comfyui && pip install --no-cache-dir -r requirements.txt
+RUN cd /comfyui/custom_nodes/ComfyUI-Frame-Interpolation && pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
 COPY handler.py start.sh /
