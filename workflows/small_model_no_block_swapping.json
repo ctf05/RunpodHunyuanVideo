@@ -71,7 +71,7 @@
     "inputs": {
       "llm_model": "Kijai/llava-llama-3-8b-text-encoder-tokenizer",
       "clip_model": "openai/clip-vit-large-patch14",
-      "precision": "fp16",
+      "precision": "bf16",
       "apply_final_norm": false,
       "hidden_state_skip_layer": 2,
       "quantization": "bnb_nf4"
