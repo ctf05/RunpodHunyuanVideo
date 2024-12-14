@@ -107,7 +107,7 @@
       "megabit": true,
       "save_metadata": false,
       "pingpong": false,
-      "save_output": false,
+      "save_output": true,
       "images": [
         "52",
         0
