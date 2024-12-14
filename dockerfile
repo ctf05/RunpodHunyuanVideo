@@ -110,7 +110,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN cd /comfyui/custom_nodes/ComfyUI-HunyuanVideoWrapper && pip install --no-cache-dir -r requirements.txt
 RUN cd /comfyui/custom_nodes/ComfyUI-VideoHelperSuite && pip install --no-cache-dir -r requirements.txt
 RUN cd /comfyui/custom_nodes/was-node-suite-comfyui && pip install --no-cache-dir -r requirements.txt
-RUN cd /comfyui/custom_nodes/ComfyUI-Frame-Interpolation && pip install --no-cache-dir -r requirements.txt
+RUN cd /comfyui/custom_nodes/ComfyUI-Frame-Interpolation && pip install --no-cache-dir -r requirements-with-cupy.txt
 
 # Copy application files
 COPY handler.py start.sh /
