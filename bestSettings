@@ -4,11 +4,11 @@ inference steps: 25
 Guidance scale: 6
 2 bad
 
-fps: 16
+fps: 12 upped to 24
 
-flow_shift: 6
+flow_shift: 2
 
-crf: 36
-Nobody could notice the difference. 40 is noticeably much worse
+crf: 26
+36 hs notible giant squares
 
 plx_fmt: yuv420p
