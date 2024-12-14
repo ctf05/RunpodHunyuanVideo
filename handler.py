@@ -185,7 +185,7 @@ def handler(job):
             return {"error": str(e)}
 
         num_frames = validate_frame_count(job_input.get("num_frames", 17))
-        fps = job_input.get("fps", 16)
+        fps = job_input.get("fps", 24) / 2 # We double the fps in the workflow
         num_inference_steps = job_input.get("num_inference_steps", 25)
         guidance_scale = job_input.get("guidance_scale", 6)
         flow_shift = job_input.get("flow_shift", 2)
