@@ -51,7 +51,7 @@ RUN git clone https://github.com/kijai/ComfyUI-HunyuanVideoWrapper.git custom_no
     git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git custom_nodes/ComfyUI-VideoHelperSuite && \
     git clone https://github.com/WASasquatch/was-node-suite-comfyui/ custom_nodes/was-node-suite-comfyui && \
     git clone https://github.com/Fannovel16/ComfyUI-Frame-Interpolation/ custom_nodes/ComfyUI-Frame-Interpolation && \
-    wget custom_nodes/ComfyUI-Frame-Interpolation/ckpts/rife/rife49.pth https://github.com/styler00dollar/VSGAN-tensorrt-docker/releases/download/models/rife49.pth
+    wget https://github.com/styler00dollar/VSGAN-tensorrt-docker/releases/download/models/rife49.pth -P custom_nodes/ComfyUI-Frame-Interpolation/ckpts/rife/
 
 # Create necessary directories
 RUN mkdir -p \
