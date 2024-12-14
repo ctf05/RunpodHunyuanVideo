@@ -188,7 +188,7 @@ def handler(job):
         fps = job_input.get("fps", 16)
         num_inference_steps = job_input.get("num_inference_steps", 25)
         guidance_scale = job_input.get("guidance_scale", 6)
-        flow_shift = job_input.get("flow_shift", 6)
+        flow_shift = job_input.get("flow_shift", 2)
         video_index = job_input.get("video_index", None)
 
         # Validate total size

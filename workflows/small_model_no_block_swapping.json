@@ -4,7 +4,7 @@
       "model": "hunyuan_video_720_fp8_e4m3fn.safetensors",
       "base_precision": "bf16",
       "quantization": "fp8_e4m3fn",
-      "load_device": "offload_device",
+      "load_device": "main_device",
       "attention_mode": "sageattn_varlen"
     },
     "class_type": "HyVideoModelLoader",
@@ -73,7 +73,7 @@
       "clip_model": "openai/clip-vit-large-patch14",
       "precision": "bf16",
       "apply_final_norm": false,
-      "hidden_state_skip_layer": 2,
+      "hidden_state_skip_layer": 1,
       "quantization": "bnb_nf4"
     },
     "class_type": "DownloadAndLoadHyVideoTextEncoder",
