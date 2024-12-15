@@ -16,7 +16,7 @@ COMFY_POLLING_INTERVAL_MS = 250
 COMFY_POLLING_MAX_RETRIES = 50000
 COMFY_HOST = "127.0.0.1:8188"
 REFRESH_WORKER = os.environ.get("REFRESH_WORKER", "false").lower() == "true"
-MIN_GENERATION_PIXELS = 640 * 416
+MIN_GENERATION_PIXELS = 640 * 416640*416
 MAX_GENERATION_TOTAL = 496 * 512 * 117
 
 def resize_and_compress_image(image_bytes, target_width, target_height):
@@ -178,7 +178,7 @@ def handler(job):
         target_width = job_input.get("target_width", 512)
         target_height = job_input.get("target_height", 288)
 
-        prompt = prompt + ". Really fast motion."
+        prompt = prompt + ". Really fast motion. The scene appears to be real life footage with a hyper-realistic art style."
 
         # Calculate optimal generation dimensions
         try:
