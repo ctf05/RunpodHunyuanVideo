@@ -104,7 +104,7 @@
       "format": "video/h265-mp4",
       "pix_fmt": "yuv420p",
       "crf": 30,
-      "save_metadata": false,
+      "save_metadata": true,
       "pingpong": false,
       "save_output": true,
       "images": [
