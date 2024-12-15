@@ -16,7 +16,7 @@ COMFY_POLLING_INTERVAL_MS = 250
 COMFY_POLLING_MAX_RETRIES = 50000
 COMFY_HOST = "127.0.0.1:8188"
 REFRESH_WORKER = os.environ.get("REFRESH_WORKER", "false").lower() == "true"
-MIN_GENERATION_PIXELS = 512 * 320
+MIN_GENERATION_PIXELS = 640 * 416
 MAX_GENERATION_TOTAL = 500 * 500 * 100
 
 def resize_and_compress_image(image_bytes, target_width, target_height):
@@ -178,7 +178,7 @@ def handler(job):
         target_width = job_input.get("target_width", 512)
         target_height = job_input.get("target_height", 288)
 
-        prompt = prompt + ". really fast motion"
+        prompt = prompt + ". Really fast motion."
 
         # Calculate optimal generation dimensions
         try:
@@ -188,9 +188,9 @@ def handler(job):
 
         num_frames = validate_frame_count(job_input.get("num_frames", 17))
         fps = job_input.get("fps", 24)
-        num_inference_steps = job_input.get("num_inference_steps", 25)
-        guidance_scale = job_input.get("guidance_scale", 6)
-        flow_shift = job_input.get("flow_shift", 2)
+        num_inference_steps = job_input.get("num_inference_steps", 15)
+        guidance_scale = job_input.get("guidance_scale", 10)
+        flow_shift = job_input.get("flow_shift", 8)
         video_index = job_input.get("video_index", None)
 
         # Validate total size

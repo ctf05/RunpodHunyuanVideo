@@ -4,7 +4,7 @@
       "model": "hunyuan_video_720_fp8_e4m3fn.safetensors",
       "base_precision": "bf16",
       "quantization": "fp8_e4m3fn",
-      "load_device": "main_device",
+      "load_device": "offload_device",
       "attention_mode": "sageattn_varlen"
     },
     "class_type": "HyVideoModelLoader",
@@ -119,7 +119,7 @@
   },
   "42": {
     "inputs": {
-      "model_name": "RealESRGAN_x4.pth"
+      "model_name": "RealESRGAN_x2.pth"
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
@@ -162,7 +162,7 @@
   },
   "50": {
     "inputs": {
-      "iterations": 2,
+      "iterations": 1,
       "kernel_size": 3,
       "images": [
         "5",
@@ -177,7 +177,7 @@
   "52": {
     "inputs": {
       "ckpt_name": "rife49.pth",
-      "clear_cache_after_n_frames": 400,
+      "clear_cache_after_n_frames": 500,
       "multiplier": 2,
       "fast_mode": true,
       "ensemble": true,

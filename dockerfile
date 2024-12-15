@@ -89,7 +89,7 @@ RUN cd models/LLM/llava-llama-3-8b-text-encoder-tokenizer && \
 
 # Download upscaling model
 RUN cd models/upscale_models && \
-    wget https://huggingface.co/ai-forever/Real-ESRGAN/resolve/main/RealESRGAN_x4.pth
+    wget https://huggingface.co/ai-forever/Real-ESRGAN/resolve/main/RealESRGAN_x2.pth
 
 ARG USE_SMALL_MODEL=true
 
