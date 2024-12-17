@@ -63,7 +63,7 @@ class HunyuanGenerator:
 
         # Replace all placeholders
         replacements = {
-            '|prompt|': str(params.get('prompt')),
+            '|prompt|': params.get('prompt'),
             '|base_width|': str(params.get('base_width')),
             '|base_height|': str(params.get('base_height')),
             '|target_width|': str(params.get('target_width')),
