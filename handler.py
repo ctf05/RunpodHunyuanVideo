@@ -178,7 +178,7 @@ def handler(job):
         target_width = job_input.get("target_width", 512)
         target_height = job_input.get("target_height", 288)
 
-        prompt = prompt + ". Really fast motion. The scene appears to be real life footage with a hyper-realistic art style."
+        prompt = prompt + " Really fast motion. The scene appears to be real life footage with a hyper-realistic art style."
 
         # Calculate optimal generation dimensions
         try:
