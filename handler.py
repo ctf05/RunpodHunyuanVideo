@@ -23,7 +23,6 @@ def resize_and_compress_image(image_bytes, target_width, target_height):
     """Resize and compress the preview image"""
     # Open the image from bytes
     img = Image.open(BytesIO(image_bytes))
-
     # Resize the image
     img = img.resize((target_width, target_height), Image.Resampling.LANCZOS)
 
