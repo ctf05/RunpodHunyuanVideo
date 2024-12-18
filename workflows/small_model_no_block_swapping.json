@@ -83,7 +83,7 @@
   },
   "30": {
     "inputs": {
-      "prompt": "|prompt|",
+      "prompt": |prompt|,
       "force_offload": true,
       "prompt_template": "video",
       "text_encoders": [
