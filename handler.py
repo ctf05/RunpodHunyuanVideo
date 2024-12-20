@@ -165,6 +165,14 @@ def validate_frame_count(num_frames):
         num_frames = ((num_frames - 1) // 4 * 4) + 5
     return num_frames
 
+def adjust_frame_count_to_fit(num_frames, base_width, base_height):
+    pixels_per_frame = base_width * base_height
+    max_possible_frames = MAX_GENERATION_TOTAL // pixels_per_frame
+
+    adjusted_frames = ((max_possible_frames - 1) // 4 * 4) + 1
+
+    return adjusted_frames
+
 def handler(job):
     """Main handler function"""
     try:
@@ -195,7 +203,9 @@ def handler(job):
         # Validate total size
         if base_width * base_height * num_frames > MAX_GENERATION_TOTAL:
             print(f"runpod-worker-comfy - Total size exceeds maximum allowed: {base_width}x{base_height}x{num_frames}")
-            return {"error": "Width * height * num_frames exceeds maximum allowed"}
+            print(f"runpod-worker-comfy - Adjusting frame count to fit maximum size: previous={num_frames}")
+            num_frames = adjust_frame_count_to_fit(num_frames, base_width, base_height)
+            print(f"runpod-worker-comfy - Adjusted frame count: new={num_frames}")
 
         # Check if ComfyUI is available
         if not check_server(f"http://{COMFY_HOST}"):
