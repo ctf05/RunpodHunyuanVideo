@@ -12,3 +12,78 @@ crf: 26
 36 hs notible giant squares
 
 plx_fmt: yuv420p
+
+
+
+
+optimizing 960x544x73, official fp8
+prompt: A cute korean woman aiming a rifle at a wolf. Real life footage.
+reasoning (testing different aspects):
+cute: subjective
+korean: normalization
+woman: abnormal gender for hunting
+rifle: Objective
+wolf: Objective
+seed: 58392
+
+Starting values:
+steps: 15
+enhance: off
+TeaCache: off
+Guidance scale: 10
+flow_shift: 8
+prompt modifier: + " Real life footage"
+
+Steps:
+10- pretty good
+15- better
+20- little improvement
+25- very little improvement
+
+15 selected
+
+Guidance scale:
+3- really bad
+6- pretty good
+10- great
+14- great, test more
+
+11 selected
+
+flow_shift:
+2- horrible
+4- really bad
+8- great
+12- great, test more
+
+Additional Tests:
+
+8 selected
+
+enhance:
+1- hand artifact
+1.5- good
+2- good
+3- slightly worse
+4.5- noise
+
+2.5 selected
+
+TeaCache:
+.05- no loss- no speedup
+.1- no loss- no speedup
+.15- slight loss- 1.38x
+.2- a lot of loss- 1.68x
+.25- a lot of loss- 1.89x
+.3- horrible loss- 2.15x
+
+Not saved:
+.12- no loss- 1.1x speedup
+
+.12 selected
+
+
+Max num_frames for VRAM with no blockswapping or auto_cpu_offload: 81
+
+
+
